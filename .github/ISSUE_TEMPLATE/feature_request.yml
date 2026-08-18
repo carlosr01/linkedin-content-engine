@@ -1,0 +1,57 @@
+name: Feature request
+description: Propose a capability tied to a clear user outcome and safe acceptance criteria.
+title: 'feat: '
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Describe the recurring problem without prescribing a solution.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: User outcome
+      description: What should the personal-brand owner be able to accomplish?
+    validations:
+      required: true
+  - type: textarea
+    id: capability
+    attributes:
+      label: Proposed capability
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: true
+  - type: input
+    id: workflows
+    attributes:
+      label: Affected workflows
+      placeholder: WF03, WF04, shared contracts
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Security implications
+      description: Include credentials, permissions, prompt injection, personal data, and publication risk.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Use observable, testable outcomes.
+      placeholder: |
+        - [ ] Contract updated
+        - [ ] DEV behavior verified
+        - [ ] Human approval invariant tested
+    validations:
+      required: true

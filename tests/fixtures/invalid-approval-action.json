@@ -1,0 +1,9 @@
+{
+  "id": "approval-001",
+  "draftId": "draft-001",
+  "draftVersion": 1,
+  "decision": "PUBLISH",
+  "reviewer": "owner",
+  "reviewedAt": "2026-08-18T15:00:00Z",
+  "comments": null
+}

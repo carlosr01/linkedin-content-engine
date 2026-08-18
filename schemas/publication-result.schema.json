@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:linkedin-content-engine:schema:publication-result",
+  "title": "PublicationResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "draftId",
+    "approvalId",
+    "attemptId",
+    "idempotencyKey",
+    "publicationStatus",
+    "linkedinPostId",
+    "publishedAt",
+    "errorCode",
+    "errorMessage"
+  ],
+  "properties": {
+    "draftId": { "type": "string", "minLength": 1 },
+    "approvalId": { "type": "string", "minLength": 1 },
+    "attemptId": { "type": "string", "minLength": 1 },
+    "idempotencyKey": { "type": "string", "minLength": 1 },
+    "publicationStatus": {
+      "type": "string",
+      "enum": ["PUBLISHED", "FAILED"]
+    },
+    "linkedinPostId": { "type": ["string", "null"] },
+    "publishedAt": {
+      "oneOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }]
+    },
+    "errorCode": { "type": ["string", "null"] },
+    "errorMessage": { "type": ["string", "null"] }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "publicationStatus": { "const": "PUBLISHED" } },
+        "required": ["publicationStatus"]
+      },
+      "then": {
+        "properties": {
+          "linkedinPostId": { "type": "string", "minLength": 1 },
+          "publishedAt": { "type": "string", "format": "date-time" },
+          "errorCode": { "type": "null" },
+          "errorMessage": { "type": "null" }
+        }
+      },
+      "else": {
+        "properties": {
+          "linkedinPostId": { "type": "null" },
+          "publishedAt": { "type": "null" },
+          "errorCode": { "type": "string", "minLength": 1 },
+          "errorMessage": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  ]
+}

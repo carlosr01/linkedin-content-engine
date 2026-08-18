@@ -1,0 +1,38 @@
+version: 1
+sources:
+  - id: openai-news-rss
+    name: OpenAI News
+    type: rss
+    enabled: true
+    url: https://openai.com/news/rss.xml
+    priority: 80
+    topics:
+      - artificial-intelligence
+      - product-strategy
+    language: en
+  - id: example-company-publications
+    name: Example company publications
+    type: blog
+    enabled: false
+    url: https://example.com/publications
+    priority: 50
+    topics:
+      - automation
+    language: es
+  - id: selected-newsletter
+    name: Selected newsletter
+    type: newsletter
+    enabled: false
+    url: https://example.com/newsletter
+    priority: 40
+    topics:
+      - leadership
+    language: es
+  - id: manual-telegram-url
+    name: Manually submitted URLs
+    type: manual_url
+    enabled: true
+    url: null
+    priority: 100
+    topics: []
+    language: auto

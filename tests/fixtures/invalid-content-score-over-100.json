@@ -1,0 +1,13 @@
+{
+  "candidateId": "candidate-001",
+  "relevanceScore": 101,
+  "brandAlignment": 80,
+  "audienceValue": 85,
+  "novelty": 70,
+  "authority": 75,
+  "opinionPotential": 90,
+  "recommended": true,
+  "reason": "Representative intentionally invalid score fixture.",
+  "contentPillar": "practical-ai",
+  "recommendedFormat": "insight"
+}

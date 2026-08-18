@@ -1,0 +1,41 @@
+# Environment and credentials
+.env
+.env.local
+.env.*.local
+.env.*
+!.env.example
+credentials/
+credential-exports/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Dependencies and generated reports
+node_modules/
+coverage/
+dist/
+reports/
+
+# Runtime exports and dumps
+*.dump
+*.sqlite
+*.sqlite3
+runtime-data/
+n8n-data/
+
+# Logs and temporary files
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+*~
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

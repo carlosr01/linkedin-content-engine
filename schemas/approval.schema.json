@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:linkedin-content-engine:schema:approval",
+  "title": "Approval",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "draftId",
+    "draftVersion",
+    "decision",
+    "reviewer",
+    "reviewedAt",
+    "comments"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "draftId": { "type": "string", "minLength": 1 },
+    "draftVersion": { "type": "integer", "minimum": 1 },
+    "decision": {
+      "type": "string",
+      "enum": ["APPROVE", "REVISE", "REJECT"]
+    },
+    "reviewer": { "type": "string", "minLength": 1 },
+    "reviewedAt": { "type": "string", "format": "date-time" },
+    "comments": { "type": ["string", "null"] }
+  }
+}

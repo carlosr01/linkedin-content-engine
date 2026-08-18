@@ -1,0 +1,15 @@
+version: 1
+environment: development
+timezone: America/Lima
+dry_run: true
+workflow_ids:
+  discovery: null
+  reference_ingestion: null
+  editorial: null
+  approval_and_publishing: null
+  analytics: null
+defaults:
+  source_fetch_timeout_seconds: 30
+  maximum_candidates_per_run: 25
+  retry_attempts: 3
+  require_correlation_id: true

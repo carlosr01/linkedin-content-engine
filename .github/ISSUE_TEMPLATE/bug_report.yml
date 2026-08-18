@@ -1,0 +1,78 @@
+name: Bug report
+description: Report reproducible incorrect behavior without exposing sensitive data.
+title: 'fix: '
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Sanitize logs and remove tokens, credentials, private source content, and personal data before submitting.
+  - type: input
+    id: workflow
+    attributes:
+      label: Affected workflow
+      description: Workflow name or repository path; do not include credentials.
+      placeholder: WF01 Discovery
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - Local or repository validation
+        - n8n DEV
+        - Production (observation only; no agent changes)
+        - Unknown
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Use non-sensitive test data and note whether the behavior is repeatable.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs
+      render: shell
+  - type: input
+    id: n8n_version
+    attributes:
+      label: n8n version
+      placeholder: Not applicable or exact version
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Low — minor degradation
+        - Medium — workflow blocked with workaround
+        - High — workflow blocked without workaround
+        - Critical — security or unintended publication risk
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I removed credentials, tokens, private data, and complete webhook URLs.
+          required: true

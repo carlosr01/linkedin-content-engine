@@ -1,0 +1,8 @@
+version: 1
+minimum_relevance_score: 75
+human_approval_required: true
+auto_publish: false
+allow_unsourced_claims: false
+allow_direct_copy: false
+default_language: es
+maximum_revision_attempts: 3

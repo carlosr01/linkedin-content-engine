@@ -1,0 +1,15 @@
+{
+  "id": "candidate-002",
+  "sourceId": "source-002",
+  "sourceType": "manual_url",
+  "sourceUrl": "https://example.com/manual-reference",
+  "sourceTitle": "Manual reference",
+  "sourceAuthor": null,
+  "sourcePublishedAt": null,
+  "discoveredAt": "2026-08-18T13:00:00Z",
+  "rawSummary": "This fixture intentionally omits contentHash.",
+  "canonicalUrl": "https://example.com/manual-reference",
+  "language": "es",
+  "topics": [],
+  "status": "NORMALIZED"
+}

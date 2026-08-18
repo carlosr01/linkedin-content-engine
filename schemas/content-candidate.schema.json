@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:linkedin-content-engine:schema:content-candidate",
+  "title": "ContentCandidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "sourceId",
+    "sourceType",
+    "sourceUrl",
+    "sourceTitle",
+    "sourceAuthor",
+    "sourcePublishedAt",
+    "discoveredAt",
+    "rawSummary",
+    "canonicalUrl",
+    "contentHash",
+    "language",
+    "topics",
+    "status"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "sourceId": { "type": "string", "minLength": 1 },
+    "sourceType": {
+      "type": "string",
+      "enum": [
+        "rss",
+        "blog",
+        "company_publication",
+        "newsletter",
+        "manual_url",
+        "other"
+      ]
+    },
+    "sourceUrl": { "type": "string", "format": "uri" },
+    "sourceTitle": { "type": "string", "minLength": 1 },
+    "sourceAuthor": { "type": ["string", "null"] },
+    "sourcePublishedAt": {
+      "oneOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }]
+    },
+    "discoveredAt": { "type": "string", "format": "date-time" },
+    "rawSummary": { "type": "string", "minLength": 1 },
+    "canonicalUrl": { "type": "string", "format": "uri" },
+    "contentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "language": {
+      "type": "string",
+      "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+    },
+    "topics": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "DISCOVERED",
+        "NORMALIZED",
+        "SCORED",
+        "SELECTED",
+        "DRAFTED",
+        "IN_REVIEW",
+        "REVISION_REQUESTED",
+        "APPROVED",
+        "REJECTED",
+        "SCHEDULED",
+        "PUBLISHING",
+        "PUBLISHED",
+        "FAILED"
+      ]
+    }
+  }
+}

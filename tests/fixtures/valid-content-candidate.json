@@ -1,0 +1,16 @@
+{
+  "id": "candidate-001",
+  "sourceId": "source-001",
+  "sourceType": "rss",
+  "sourceUrl": "https://example.com/articles/ai-operations",
+  "sourceTitle": "A practical view of AI operations",
+  "sourceAuthor": "Example Author",
+  "sourcePublishedAt": "2026-08-17T12:00:00Z",
+  "discoveredAt": "2026-08-18T12:00:00Z",
+  "rawSummary": "A sourced discussion of operating AI systems reliably.",
+  "canonicalUrl": "https://example.com/articles/ai-operations",
+  "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "language": "en",
+  "topics": ["artificial-intelligence", "operations"],
+  "status": "NORMALIZED"
+}

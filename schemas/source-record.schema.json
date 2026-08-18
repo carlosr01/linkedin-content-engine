@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:linkedin-content-engine:schema:source-record",
+  "title": "SourceRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "type",
+    "originalUrl",
+    "canonicalUrl",
+    "title",
+    "author",
+    "publishedAt",
+    "retrievedAt",
+    "language",
+    "contentHash",
+    "extractedText"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "type": {
+      "type": "string",
+      "enum": [
+        "rss",
+        "blog",
+        "company_publication",
+        "newsletter",
+        "manual_url",
+        "other"
+      ]
+    },
+    "originalUrl": { "type": "string", "format": "uri" },
+    "canonicalUrl": { "type": "string", "format": "uri" },
+    "title": { "type": "string", "minLength": 1 },
+    "author": { "type": ["string", "null"] },
+    "publishedAt": {
+      "oneOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }]
+    },
+    "retrievedAt": { "type": "string", "format": "date-time" },
+    "language": {
+      "type": "string",
+      "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+    },
+    "contentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "extractedText": { "type": "string", "minLength": 1 },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:linkedin-content-engine:schema:content-score",
+  "title": "ContentScore",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "candidateId",
+    "relevanceScore",
+    "brandAlignment",
+    "audienceValue",
+    "novelty",
+    "authority",
+    "opinionPotential",
+    "recommended",
+    "reason",
+    "contentPillar",
+    "recommendedFormat"
+  ],
+  "properties": {
+    "candidateId": { "type": "string", "minLength": 1 },
+    "relevanceScore": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "brandAlignment": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "audienceValue": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "novelty": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "authority": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "opinionPotential": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "recommended": { "type": "boolean" },
+    "reason": { "type": "string", "minLength": 1, "maxLength": 1000 },
+    "contentPillar": { "type": "string", "minLength": 1 },
+    "recommendedFormat": {
+      "type": "string",
+      "enum": [
+        "insight",
+        "how_to",
+        "case_study",
+        "contrarian_view",
+        "story",
+        "list",
+        "question"
+      ]
+    }
+  }
+}
