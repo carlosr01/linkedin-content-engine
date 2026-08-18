@@ -1,0 +1,139 @@
+services:
+  postgres:
+    image: postgres:16.15-alpine3.24
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+      TZ: America/Lima
+    volumes:
+      - n8n_dev_postgres_data:/var/lib/postgresql/data
+    networks:
+      - n8n_dev_backend
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: ${POSTGRES_MEMORY_LIMIT:-512m}
+    cpus: ${POSTGRES_CPU_LIMIT:-0.50}
+    pids_limit: 256
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:2.35.3
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: '5432'
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?Set a new DEV-only N8N_ENCRYPTION_KEY in .env}
+      N8N_HOST: ${N8N_HOST:?Set N8N_HOST in .env}
+      N8N_PORT: '5678'
+      N8N_LISTEN_ADDRESS: 0.0.0.0
+      N8N_PROTOCOL: https
+      N8N_EDITOR_BASE_URL: https://${N8N_HOST:?Set N8N_HOST in .env}
+      N8N_WEBHOOK_URL: https://${N8N_HOST:?Set N8N_HOST in .env}/
+      N8N_MCP_BASE_URL: https://${N8N_HOST:?Set N8N_HOST in .env}
+      N8N_PROXY_HOPS: ${N8N_PROXY_HOPS:-1}
+      N8N_SECURE_COOKIE: 'true'
+
+      GENERIC_TIMEZONE: America/Lima
+      TZ: America/Lima
+      EXECUTIONS_MODE: regular
+
+      N8N_INSTANCE_OWNER_MANAGED_BY_ENV: 'true'
+      N8N_INSTANCE_OWNER_EMAIL: ${N8N_INSTANCE_OWNER_EMAIL:?Set the DEV owner email in .env}
+      N8N_INSTANCE_OWNER_FIRST_NAME: ${N8N_INSTANCE_OWNER_FIRST_NAME:?Set the DEV owner first name in .env}
+      N8N_INSTANCE_OWNER_LAST_NAME: ${N8N_INSTANCE_OWNER_LAST_NAME:?Set the DEV owner last name in .env}
+      N8N_INSTANCE_OWNER_PASSWORD_HASH: ${N8N_INSTANCE_OWNER_PASSWORD_HASH:?Set a DEV-only bcrypt password hash in .env}
+
+      N8N_MCP_MANAGED_BY_ENV: 'true'
+      N8N_MCP_ACCESS_ENABLED: ${N8N_MCP_ACCESS_ENABLED:-false}
+
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: 'true'
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: 'true'
+      N8N_DIAGNOSTICS_ENABLED: 'false'
+      N8N_PERSONALIZATION_ENABLED: 'false'
+      N8N_TEMPLATES_ENABLED: 'false'
+      N8N_VERSION_NOTIFICATIONS_ENABLED: 'false'
+      N8N_COMMUNITY_PACKAGES_ENABLED: 'false'
+
+      N8N_LOG_LEVEL: info
+      N8N_LOG_OUTPUT: console
+      N8N_LOG_FORMAT: json
+      EXECUTIONS_DATA_PRUNE: 'true'
+      EXECUTIONS_DATA_MAX_AGE: ${EXECUTIONS_DATA_MAX_AGE:-168}
+      EXECUTIONS_DATA_PRUNE_MAX_COUNT: ${EXECUTIONS_DATA_PRUNE_MAX_COUNT:-1000}
+    volumes:
+      - n8n_dev_data:/home/node/.n8n
+    expose:
+      - '5678'
+    networks:
+      - n8n_dev_backend
+      - traefik
+    labels:
+      traefik.enable: 'true'
+      traefik.docker.network: ${TRAEFIK_NETWORK:?Set TRAEFIK_NETWORK in .env}
+      traefik.http.routers.linkedin-content-engine-n8n-dev.rule: Host(`${N8N_HOST:?Set N8N_HOST in .env}`)
+      traefik.http.routers.linkedin-content-engine-n8n-dev.entrypoints: websecure
+      traefik.http.routers.linkedin-content-engine-n8n-dev.tls: 'true'
+      traefik.http.routers.linkedin-content-engine-n8n-dev.tls.certresolver: ${TRAEFIK_CERT_RESOLVER:?Set TRAEFIK_CERT_RESOLVER in .env}
+      traefik.http.routers.linkedin-content-engine-n8n-dev.service: linkedin-content-engine-n8n-dev
+      traefik.http.services.linkedin-content-engine-n8n-dev.loadbalancer.server.port: '5678'
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:5678/healthz').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: ${N8N_MEMORY_LIMIT:-1g}
+    cpus: ${N8N_CPU_LIMIT:-1.00}
+    pids_limit: 512
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+networks:
+  n8n_dev_backend:
+    name: ${COMPOSE_PROJECT_NAME:-linkedin-content-engine-n8n-dev}-backend
+    internal: true
+  traefik:
+    name: ${TRAEFIK_NETWORK:?Set TRAEFIK_NETWORK in .env}
+    external: true
+
+volumes:
+  n8n_dev_data:
+    name: ${COMPOSE_PROJECT_NAME:-linkedin-content-engine-n8n-dev}-n8n-data
+  n8n_dev_postgres_data:
+    name: ${COMPOSE_PROJECT_NAME:-linkedin-content-engine-n8n-dev}-postgres-data
