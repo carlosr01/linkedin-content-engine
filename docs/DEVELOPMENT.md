@@ -58,6 +58,19 @@ If API configuration is unavailable on the current plan, apply this list manuall
 
 Never author plausible-looking workflow JSON from memory. Work through official n8n skills and the live DEV environment, prefer native nodes, validate structure and semantics, test negative/idempotency paths, re-read the stored definition, then export it. Document any justified Code node.
 
+## Isolated n8n DEV environment
+
+The isolated Docker Compose definition and complete operator runbook live in [`infra/n8n-dev/`](../infra/n8n-dev/README.md). It provisions a dedicated n8n container, PostgreSQL container, internal network, and persistent volumes behind the existing Dokploy/Traefik proxy. It does not include Redis, queue workers, production credentials, or third-party integration credentials.
+
+For local review without deploying containers, create a temporary untracked `.env` from `infra/n8n-dev/.env.example`, fill it only with synthetic validation values, and run:
+
+```bash
+cd infra/n8n-dev
+docker compose --env-file .env config --quiet
+```
+
+The DEV deployment defaults to `N8N_MCP_ACCESS_ENABLED=false`, and all workflows must remain unpublished (inactive) unless a separate reviewed test explicitly requires otherwise. Preparing or validating this Compose definition does not authorize deployment, MCP enablement, credential creation, workflow activation, or any production action.
+
 ## Test data
 
 Use synthetic, explicitly safe fixtures. Do not copy production executions, credentials, personal messages, private source content, or complete webhook URLs into the repository.
