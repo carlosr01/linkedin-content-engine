@@ -1,6 +1,6 @@
 # n8n workflow exports
 
-This directory will contain sanitized JSON exports retrieved from n8n DEV after live structural and semantic validation. Phase 0 intentionally contains no workflow JSON; plausible-looking exports must not be fabricated from model memory.
+This directory contains sanitized JSON exports retrieved and re-read from n8n DEV. WF01 is inactive; its real scorer remains blocked as documented in `docs/verification/CAR-48-wf01.md`. Fixture executions do not establish provider readiness. Exports must not be fabricated from model memory.
 
 | Category               | Intended content                                           |
 | ---------------------- | ---------------------------------------------------------- |

@@ -1,44 +1,69 @@
-# CAR-48 — paquete reproducible de WF01
+# CAR-48 — WF01 en n8n DEV
 
-## Estado y alcance
+## Estado
 
-**Implementación local verificada; integración n8n DEV bloqueada. CAR-48 no está completado.**
+**Integración DEV implementada e inactiva; cierre bloqueado por el scorer real.**
 
-Issue: [CAR-48](https://linear.app/carloshermesagent/issue/CAR-48/feat-implement-wf01-content-discovery).
-Orquestador: Orca. Repositorio canónico: `carlosr01/linkedin-content-engine`.
-Base: `45ec94dac5b0d66b1cf40616174a408034658a77`.
-Rama: `feat/car-48-wf01-content-discovery`.
+[CAR-48](https://linear.app/carloshermesagent/issue/CAR-48/feat-implement-wf01-content-discovery) · Orca · [PR #14 (draft)](https://github.com/carlosr01/linkedin-content-engine/pull/14).
+Rama: `feat/car-48-wf01-content-discovery`. Base del paquete local: `4df0220998113e04e2fdecc90620bcb05fea6702`.
 
-La sesión inicial abrió un checkout de `hermes-agent`. Se preparó un checkout aislado del repositorio correcto; Hermes no se modificó.
+- Entorno existente: `n8n-dev.innovaq-ai.com`, contenedor `linkedin-content-engine-n8n-dev-n8n-1`.
+- n8n **2.35.7**; Node del runtime **24.18.1**.
+- Workflow reutilizado: **MBjubZf00zHeukFo**, `WF01__content_discovery`.
+- Versión final: **bcc18704-2881-4c3a-a29b-184e2a0a75f7**. Hash del export y versiones de cada tipo: [CAR-48-readback.json](CAR-48-readback.json).
+- `active=false`, `activeVersionId=null`, sin pin data guardada. Único trigger: manual.
+- Export releído y sanitizado: [wf01-content-discovery.json](../../workflows/discovery/wf01-content-discovery.json).
+- No se creó otro entorno, workflow ni scheduler. Se retiró el Schedule Trigger del WF01 previamente existente e inactivo. El otro workflow de conectividad permaneció intacto.
+- Sin acciones sobre PROD, Hermes, drafting, approval ni publicación. WF01 termina al persistir el candidato.
 
-| Evidencia                                 | Estado                                     |
-| ----------------------------------------- | ------------------------------------------ |
-| Workflow ID / versión DEV                 | **NO DISPONIBLE: no creado ni consultado** |
-| Definiciones actuales de nodos DEV        | **PENDIENTE**                              |
-| Persistencia y relectura del workflow DEV | **PENDIENTE**                              |
-| Pruebas de ejecución n8n DEV              | **PENDIENTE**                              |
-| Export sanitizado de n8n                  | **NO GENERADO**                            |
-| Paquete local y pruebas de contrato       | **PASS**                                   |
-| Scheduler, drafting, approval, publishing | **Ausentes**                               |
+## Acceso y definiciones oficiales
 
-El catálogo de herramientas de esta sesión no expone n8n MCP. La búsqueda de plugins n8n no devolvió resultados y la configuración local de Codex no registra servidores MCP. El usuario autorizó habilitar la conexión DEV, pero esa autorización no establece conectividad. Orca debe exponer el MCP DEV existente; no hacen falta secretos por chat. No se alteró la configuración del servidor ni se creó otro scheduler.
+MCP n8n sigue sin exponerse en esta sesión; la integración se realizó por el runtime/CLI del **DEV existente**, no mediante un MCP ficticio. Health DEV respondió 200; el endpoint MCP respondió 401. No se solicitaron ni imprimieron credenciales.
 
-El comentario de alcance del issue permite detener la implementación en un paquete reproducible cuando falta acceso DEV. No se fabricó un export con versiones de nodos recordadas. El PR debe permanecer en draft hasta completar las verificaciones live.
+Se consultaron las skills oficiales de [n8n-io/skills](https://github.com/n8n-io/skills/tree/180b8415e3b73f78828cfa01e908e67f89f2a139): meta-skill, lifecycle, error-handling, code-nodes, node-configuration, data-tables, credential-security, agents y loops, incluyendo la referencia de pruebas. Se exportaron **910 definiciones del runtime instalado** mediante `n8n export:nodes`. El generador comprueba cada combinación type/typeVersion contra esa exportación live. La evidencia de tipos registra el hash del fichero consultado.
 
-## Skills oficiales consultadas
+Se inspeccionaron los workflows y tablas existentes. Se reutilizaron la tabla `WF01 Content Candidates` y la credencial OpenRouter vinculada, sin exportar su contenido. Las tablas anteriores de fuentes y scores quedaron sin cambios; cada nuevo candidato conserva sus tres contratos en un solo registro.
 
-Se consultó el checkout oficial [n8n-io/skills](https://github.com/n8n-io/skills/tree/180b8415e3b73f78828cfa01e908e67f89f2a139), SHA `180b8415e3b73f78828cfa01e908e67f89f2a139`:
+## Diseño implementado
 
-- `using-n8n-skills-official`;
-- `n8n-workflow-lifecycle-official`;
-- `n8n-error-handling-official`;
-- `n8n-code-nodes-official`.
+Fuentes explícitas tomadas de `config/sources.example.yaml`: sólo **OpenAI News RSS**, `https://openai.com/news/rss.xml`, habilitada para WF01. Se excluye `manual_url`. Techo: 5 fuentes, una descarga RSS por fuente, 25 entradas/fuente y 25 entradas/ejecución; inválidos también consumen presupuesto. No se sigue paginación ni URLs propuestas por el modelo. Redirecciones HTTP deshabilitadas.
 
-Lectura directa de sus `SKILL.md`; esta sesión no tiene un invocador de Skills n8n. Esta consulta no sustituye `get_node_types` ni validación semántica live. El paquete es JavaScript de referencia local, **no código para pegar como un Code node monolítico**. En DEV hay que priorizar nodos nativos y expresiones, y justificar cualquier Code node después de inspeccionar capacidades.
+Se usan nodos nativos Set, Split Out, Loop Over Items, HTTP Request, Wait, IF, XML, Crypto SHA-256, Basic LLM Chain, OpenRouter Chat Model, Structured Output Parser y Data Table. Los Code nodes se limitan a clasificación de errores, normalización RSS, validación AJV de schemas del repositorio, aplicación del umbral y diagnósticos. AJV se compila de antemano para evitar evaluación dinámica en el sandbox. El polyfill URL empaquetado evita depender de un global que n8n no expone; las pruebas reproducen también la restricción sobre `Object.defineProperty`.
 
-## Reproducción sin credenciales
+HTTP: timeout 30 s, tres intentos máximos para 429, 5xx o errores de red, backoff 1/2 s y respeto de `Retry-After`. Si éste supera 30 s, se difiere la fuente sin retry prematuro. Fuentes y candidatos se procesan secuencialmente; un fallo de fuente no cancela las demás. Timeout global: 900 s. Se rechaza XML con DOCTYPE/ENTITY y payload superior a 2 millones de caracteres antes del parseo.
 
-Requiere Node.js 22 o superior, como el repositorio:
+Normalización: HTTP(S) sin credenciales; fragmento y parámetros `utm_*`, `fbclid`, `gclid` eliminados; parámetros funcionales conservados. Texto NFC y whitespace normalizado; título hasta 2.000 caracteres, contenido hasta 100.000. SHA-256 sobre `JSON.stringify([title, extractedText])`. Identidades derivadas del hash de URL canónica. Fechas inválidas se rechazan; autor y fecha ausentes quedan en null en los contratos JSON.
+
+El lookup busca **URL canónica O content hash**. Se validan SourceRecord y ContentCandidate antes de scoring. El prompt system procede de `prompts/content-scorer.md`; el contenido externo se serializa como `untrustedCandidate`, sin tools. El schema y la coincidencia exacta de candidateId se vuelven a validar tras scoring. Umbral fijo **75**: sólo `SCORED` o `SELECTED`; `recommended` no decide el estado. Sin reparación automática de salida inválida.
+
+Modelo final: `deepseek/deepseek-v4-flash-0731`, el previamente configurado. Se conserva la credencial existente. Timeout 30 s y hasta dos reintentos del SDK; la política de retry del SDK no equivale a una prueba de todos los errores del proveedor. Provenance conserva modelo, correlation ID, hashes de prompt/política/contexto de marca y timestamp. No se suministró contexto de marca; el prompt lo declara y exige valoración conservadora.
+
+## Persistencia
+
+La tabla existente tenía 59 registros antes de estas pruebas. Se añadieron cuatro columnas string: `source_object`, `candidate_object`, `score_object`, `provenance_object`. Un único insert nativo escribe los escalares y los tres contratos completos con provenance. Los registros anteriores no se eliminaron ni reescribieron.
+
+Dos índices únicos PostgreSQL, sobre canonicalUrl y contentHash para filas con provenance no nulo, protegen los nuevos inserts contra carreras. Los registros heredados participan en el lookup, pero no se migraron a estos índices. La creación de índices usa la conexión del runtime; Data Tables no proporciona una opción equivalente en su nodo. **El export JSON por sí solo no transporta esos índices ni crea las columnas.**
+
+La confirmación de persistencia exige que el nodo devuelva candidateId y los objetos persistidos. Un insert rechazado no se contabiliza como éxito aunque el nodo nativo devuelva un envelope inesperado. Los casos de colisión fuerzan un lookup obsoleto mediante pin data de ejecución y comprueban el rechazo atómico; no se afirma haber probado todas las intercalaciones de dos procesos simultáneos.
+
+Los fixtures quedan en DEV, identificados por namespace `car48-*`; no se borran datos para maquillar resultados. Sus scores fijados usan provenance `fixture-scorer-v1`, claramente distintos de una respuesta real. La primera prueba exploratoria de persistencia, ejecución 42, precede a esa etiqueta: es un fixture, **no evidencia del modelo real**.
+
+## Evidencia y límites de las pruebas
+
+- [CAR-48-dev-results.json](CAR-48-dev-results.json): matriz final con execution IDs, inserts, duplicados, fallos y tiempos reales de retry.
+- [CAR-48-persistence.json](CAR-48-persistence.json): relectura independiente de bundles, validación contra los tres schemas y referencias cruzadas.
+- [CAR-48-provider-results.json](CAR-48-provider-results.json): pruebas sin pinning del scorer y diagnóstico del bloqueo.
+- [CAR-48-readback.json](CAR-48-readback.json): comparación exacta de nodos, conexiones, settings, estado y pin data después del guardado.
+
+La matriz usa HTTP real contra un servidor fixture temporal dentro del contenedor existente, nodos reales y la tabla DEV real. Fija únicamente la salida del scorer para probar determinísticamente fuente válida, ambos duplicados, item inválido, 429, 5xx, timeout, fallo parcial, score inválido y Retry-After excesivo. En las dos colisiones adicionales también fija el lookup vacío. El timeout se reduce a 100 ms sólo en su ejecución fixture; el workflow guardado conserva 30 s. No hay pin data persistida.
+
+El harness usa WorkflowRunner del runtime instalado en modo manual y clona en memoria el workflow guardado para las sustituciones declaradas. Registra sólo el contexto de Data Tables requerido por el CLI; no inicia módulos de limpieza ni otro scheduler. No equivale a una prueba del editor web ni del transporte MCP. El estado n8n `success` por sí solo no demuestra éxito de negocio: los asserts verifican inserts y salidas de error.
+
+Pruebas reales originales: ejecución **58**, scorer sobre fuente sintética, y **59**, catálogo OpenAI limitado a un candidato: el proveedor agotó el timeout y no se persistió candidato. La descarga y normalización de la fuente pública sí funcionaron. Una prueba temporal con `openai/gpt-4.1-mini`, ejecución **60**, fue rechazada por restricciones de modelos y ZDR de la cuenta. Se restauró el modelo original; no se cambiaron guardrails ni privacidad. La ejecución final **84**, sobre la versión final guardada y el catálogo real limitado a un candidato, volvió a fallar por timeout del proveedor: normalización VALID, cero inserts y un fallo de candidato observable.
+
+## Reproducción
+
+Sin credenciales:
 
 ```bash
 npm ci
@@ -46,87 +71,30 @@ npm run ci
 npm run discovery:replay
 ```
 
-El replay no hace llamadas de red: usa una fuente sintética, un scorer explícitamente simulado y un archivo temporal. Primera ejecución: `discovered=1, scored=1, selected=1`. Reabre el store y repite: `duplicate=1, scored=0`; mismo candidate ID. Elimina sólo su directorio temporal al terminar.
+Validación final: **37 tests locales PASS**, **12 casos DEV deterministas PASS** (ejecuciones 72–83), cuatro bundles releídos schema-valid, CI y replay PASS. La suite local incluye los 34 tests del paquete previo y tres pruebas nuevas del normalizador empaquetado. El replay sigue siendo offline; no acredita el proveedor real.
 
-Validación local ejecutada con Node.js `v24.21.0`:
+Sólo en el DEV identificado, un operador puede exportar el workflow y las definiciones con `n8n export:workflow` / `n8n export:nodes`. No usar exportación de credenciales. Con esos ficheros privados:
 
-- 34 tests pasan, incluidos 24 nuevos de discovery.
-- Formato, tres configuraciones y seis schemas: PASS.
-- Escaneo de secretos del repositorio: PASS.
-- Validador de workflows: PASS con **cero exports**, no evidencia de n8n.
-- Replay: PASS, `OFFLINE_FIXTURES_ONLY`, `liveDevVerified=false`.
+```bash
+node scripts/n8n-dev/prepare-update.mjs PRIVATE_LIVE_EXPORT PRIVATE_NODE_TYPES PRIVATE_INTENDED
+```
 
-`npm ci`/`npm audit` detectaron una vulnerabilidad high preexistente en la dependencia transitiva `fast-uri` del lockfile base. No se cambiaron dependencias en CAR-48. Revisarla en mantenimiento antes de usar este paquete con tráfico real; el replay no accede a URLs externas.
+El script exige WF01 existente e inactivo, conserva su binding y comprueba los tipos live. Después de importar en ese DEV y releer:
 
-## Contrato ejecutable local
+```bash
+node scripts/n8n-dev/export-verified.mjs PRIVATE_INTENDED PRIVATE_SAVED workflows/discovery/wf01-content-discovery.json docs/verification/CAR-48-readback.json
+```
 
-`lib/discovery/run.mjs` expone `runDiscovery`. Recibe exclusivamente configuración confiable y adaptadores inyectados:
+`runtime-harness.cjs` está ligado deliberadamente a la versión inspeccionada. Ejecutar dentro del contenedor existente, con un puerto de broker disponible exclusivo del proceso (se usó `N8N_RUNNERS_BROKER_PORT=5681`), workflow ID y ruta privada de evidencia. Modos: `prepare-store` (columnas/índices idempotentes) y `test`; filtros `matrix`, `live-scorer`, `live-catalog`. No instalar otro n8n ni arrancar otro servidor principal. Los ficheros `.private-debug` y `.bundles` son privados y **no se añaden a git**. `verify-persistence.mjs` genera evidencia sin cuerpos de contenido a partir de los bundles releídos.
 
-- `environment`: únicamente `development`;
-- `catalog`, `policy`: validados con los validadores existentes;
-- `brandContext`, `model`, `correlationId`;
-- `fetchPage({ source, cursor, limit, signal })` devuelve `{ items, nextCursor? }`;
-- cada item tiene `{ url, title, text, author?, publishedAt?, language? }`;
-- `score({ model, messages, signal })` devuelve JSON conforme a `content-score.schema.json`;
-- `store.find(candidate)` y `store.commit({ source, candidate, score, provenance })`;
-- reloj y espera inyectables para pruebas deterministas.
+El export versionado omite credenciales y metadatos de instancia, reemplaza IDs de tablas por `BIND_EXISTING_DEV_CANDIDATES_TABLE` y deriva IDs de nodos del nombre. Para importarlo hay que enlazar explícitamente la tabla DEV y la credencial existente; no es un workflow listo para activar.
 
-`fetchPage` y `score` **no tienen implementaciones HTTP/LLM en este paquete**. Los fixtures no prueban extracción RSS, autenticación ni comportamiento de un proveedor real. Los adaptadores live deben respetar cancelación, limitar bytes antes de parsear, rechazar destinos privados y redirecciones fuera de la allowlist, tratar el cursor como dato opaco y nunca hacer fetch de una URL escogida por el modelo. El catálogo revisado es la única autoridad de destinos; `canonicalUrl` no es una defensa SSRF.
+## Riesgos y siguiente acción
 
-Las fuentes habilitadas se ordenan por prioridad e ID. Se excluye `manual_url` (corresponde a WF02). Máximos: 5 fuentes, 2 páginas/fuente, 25 items/fuente y 25 items/ejecución. Un item inválido o duplicado también consume presupuesto. Una página que excede el límite solicitado se rechaza completa. Los límites pueden reducirse; no aumentarse por encima de esos máximos. El ejemplo del repositorio habilita sólo OpenAI News para discovery automático; los fixtures usan únicamente `example.com` como identificador, sin visitarlo.
+1. **Bloqueo pendiente:** conseguir respuesta válida del modelo permitido dentro del timeout de 30 s y repetir `live-scorer` / `live-catalog`. Orca debe coordinar la revisión del proveedor; no se solicita reducir sus restricciones de privacidad. PR #14 permanece draft y no está listo para declarar CAR-48 completo.
+2. La cota de payload se aplica después de descargar; el HTTP Request nativo mantiene el cuerpo en memoria. No se acredita un límite de bytes en streaming. Catálogo explícito, redirects deshabilitados y timeout acotan la exposición, pero no eliminan este límite.
+3. La fuente/modelo públicos pueden cambiar. La separación de prompts no demuestra resistencia editorial completa a prompt injection; la autoridad técnica termina en un candidato schema-valid.
+4. Los índices dependen del esquema físico de Data Tables de n8n 2.35.7; revisar tras upgrades. Datos heredados no migrados, sin prueba de recuperación ante caída del servidor.
+5. El runtime advierte que PostgreSQL 16 tiene soporte de compatibilidad. El lockfile conserva una vulnerabilidad high preexistente en fast-uri; no se amplió el alcance a mantenimiento de plataforma.
 
-Cada intento de fetch/scoring tiene timeout de 30 segundos y hasta 3 intentos. Se reintentan sólo errores `DiscoveryError` marcados transitorios por el adaptador confiable. El adaptador traduce 429, 5xx y errores de red a códigos; no se inspecciona texto externo para decidir retry. Espera base: 1 segundo; backoff exponencial acotado a 30 segundos. `Retry-After` mayor que el presupuesto difiere la fuente, nunca se acorta para reintentar prematuramente. Los tests inyectan esperas sin reloj real. No hay timers recurrentes, cron ni activación de workflows.
-
-## Normalización e identidad
-
-- URL absoluta HTTP(S), sin usuario/contraseña. Se elimina fragmento y sólo parámetros `utm_*`, `fbclid`, `gclid`.
-- Se conservan protocolo, path, trailing slash, parámetros funcionales y su orden para evitar colisiones semánticas.
-- Título y texto: NFC, whitespace colapsado y trim. Máximos: 2.000 y 100.000 caracteres. No se trunca silenciosamente.
-- Hash v1: SHA-256 UTF-8 de `JSON.stringify([normalizedTitle, normalizedText])`.
-- IDs de fuente y candidato: prefijo más SHA-256 de URL canónica.
-- Ausencia de autor/fecha queda en `null`; fecha presente debe ser válida y se convierte a UTC.
-- Idioma y topics provienen del catálogo; `auto` exige un idioma válido en el item. No se inventan traducciones ni resúmenes: `rawSummary` conserva el texto normalizado.
-- Cada fuente y candidato se valida contra los schemas existentes antes del scoring.
-
-Se considera duplicado si coincide **URL canónica O content hash**, no sólo si coinciden ambos. Una URL conocida con texto actualizado no crea una revisión; la actualización editorial queda fuera de WF01. Contenido igual con título diferente tiene hash diferente según la representación documentada. No se afirma deduplicación semántica.
-
-## Scoring y frontera de confianza
-
-Se usa `prompts/content-scorer.md` como mensaje system inmutable. El candidato se serializa bajo `untrustedCandidate` en un mensaje de datos; no se interpolan instrucciones de fuente en system ni existen tools o acciones de publicación. El adaptador LLM live también deberá carecer de tools. La separación de mensajes no garantiza por sí sola resistencia semántica del modelo: los tests prueban los límites de autoridad y persistencia, no la calidad editorial de un LLM real.
-
-Salida inválida, campos extra, candidate ID ajeno o números fuera de rango se rechazan sin reparación ni coerción y sin escribir registros parciales. La política existente establece 75 como umbral; `recommended` no tiene autoridad. Estados finales posibles: `SCORED` o `SELECTED`. `SELECTED` termina en persistencia y no dispara drafting ni scheduling.
-
-Provenance registra contract version, correlation ID, modelo declarado por el adaptador, SHA-256 del prompt, versión/hash de política, hash del contexto de marca y fecha de generación. No se registra razonamiento oculto. Los diagnósticos contienen códigos de allowlist y etapa, nunca mensajes de errores externos ni cuerpos de fuente.
-
-## Persistencia y recuperación
-
-`FileCandidateStore` es un adaptador **local de referencia**, no la selección del backend DEV (ADR-004 sigue vigente). Guarda fuente, candidato, score y provenance en una sola sustitución atómica del archivo; comprueba de nuevo la unicidad bajo lock exclusivo. Los tests cubren lectura tras reinicio, colisión durante commit y dos writers concurrentes. Un writer puede recibir `storage_busy`; se informa y se reejecuta después.
-
-Archivos con modo 0600 y directorios nuevos con 0700. Un snapshot corrupto falla cerrado. Un crash puede dejar un `.lock`: no se roba ni borra automáticamente. El operador debe comprobar que no hay writer activo antes de recuperar ese lock. No se garantiza durabilidad frente a pérdida eléctrica ni idoneidad para NFS/volúmenes distribuidos. El snapshot completo se lee y valida en cada operación: sólo adecuado para el replay/local, no para crecimiento indefinido. El backend DEV deberá demostrar unicidad y recuperación bajo su modelo real de concurrencia.
-
-## Matriz de pruebas pendiente en DEV
-
-Repetir los escenarios locales mediante ejecución manual y datos sintéticos en el entorno confirmado DEV:
-
-| Escenario                        | Resultado esperado                                                   |
-| -------------------------------- | -------------------------------------------------------------------- |
-| Fuente correcta                  | Registros schema-valid persistidos y lectura independiente           |
-| URL con tracking / hash repetido | Mismo candidato; sin scoring repetido ni inserts duplicados          |
-| 429 y 5xx transitorios           | Retry limitado; respeto de Retry-After                               |
-| Retry-After excesivo             | Fuente diferida, sin retry prematuro                                 |
-| Timeout y agotamiento            | Fallo observable; resto de fuentes continúa                          |
-| JSON/scoring inválido            | Sin registros parciales ni estado superior a SELECTED                |
-| Fuente fallida + fuente correcta | Resultado parcial y candidato de la segunda fuente                   |
-| Texto con instrucciones hostiles | System intacto; sin acceso a tools, política ni estados de autoridad |
-| Dos ejecuciones simultáneas      | Un candidato por URL/hash; conflicto recuperable                     |
-| Fallo de persistencia y replay   | Sin pérdidas silenciosas ni duplicados                               |
-
-## Siguiente acción de Orca
-
-1. Exponer el MCP de DEV documentado en `issue-1-n8n-dev-mcp.md`; no conectar PROD.
-2. Inspeccionar capacidades, workflows existentes y definiciones live; consultar las skills oficiales aplicables a los nodos elegidos. Resolver ubicación e integración existente antes de crear WF01.
-3. Implementar adapters y persistencia DEV con nodos nativos verificados. Sin scheduler nuevo ni acciones de draft/approval/publication. Mantener workflow inactivo.
-4. Validar semántica y ejecutar la matriz manual con fixtures y credenciales exclusivamente DEV.
-5. Releer workflow guardado y comparar nodos, conexiones, errores, límites, estado inactivo y ausencia de capacidades prohibidas. Registrar ID/version reales.
-6. Exportar desde esa relectura; retirar credenciales, IDs de instancia, URLs privadas y pin data sensible; comprobar nuevamente el export sanitizado. Guardarlo bajo `workflows/discovery/` según las convenciones del repositorio.
-7. Ejecutar CI, añadir evidencia DEV y export al mismo PR. Sólo entonces solicitar revisión para completar CAR-48.
+No activar el workflow ni fusionar el PR como parte de esta entrega. Una revisión independiente de los cambios puede comenzar, pero el cierre requiere resolver el scorer y completar la prueba real.
