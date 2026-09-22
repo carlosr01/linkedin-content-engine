@@ -91,10 +91,11 @@ El export versionado omite credenciales y metadatos de instancia, reemplaza IDs 
 
 ## Riesgos y siguiente acción
 
-1. **Bloqueo pendiente:** conseguir respuesta válida del modelo permitido dentro del timeout de 30 s y repetir `live-scorer` / `live-catalog`. Orca debe coordinar la revisión del proveedor; no se solicita reducir sus restricciones de privacidad. PR #14 permanece draft y no está listo para declarar CAR-48 completo.
-2. La cota de payload se aplica después de descargar; el HTTP Request nativo mantiene el cuerpo en memoria. No se acredita un límite de bytes en streaming. Catálogo explícito, redirects deshabilitados y timeout acotan la exposición, pero no eliminan este límite.
-3. La fuente/modelo públicos pueden cambiar. La separación de prompts no demuestra resistencia editorial completa a prompt injection; la autoridad técnica termina en un candidato schema-valid.
-4. Los índices dependen del esquema físico de Data Tables de n8n 2.35.7; revisar tras upgrades. Datos heredados no migrados, sin prueba de recuperación ante caída del servidor.
-5. El runtime advierte que PostgreSQL 16 tiene soporte de compatibilidad. El lockfile conserva una vulnerabilidad high preexistente en fast-uri; no se amplió el alcance a mantenimiento de plataforma.
+1. **CI remoto bloqueado:** [run 35761137168](https://github.com/carlosr01/linkedin-content-engine/actions/runs/35761137168) terminó en failure sin iniciar pasos. GitHub indicó una restricción de facturación/límite de gasto de la cuenta. El CI local pasó; no se afirma validación remota. Resolver la cuenta y reejecutar CI.
+2. **Bloqueo pendiente:** conseguir respuesta válida del modelo permitido dentro del timeout de 30 s y repetir `live-scorer` / `live-catalog`. Orca debe coordinar la revisión del proveedor; no se solicita reducir sus restricciones de privacidad. PR #14 permanece draft y no está listo para declarar CAR-48 completo.
+3. La cota de payload se aplica después de descargar; el HTTP Request nativo mantiene el cuerpo en memoria. No se acredita un límite de bytes en streaming. Catálogo explícito, redirects deshabilitados y timeout acotan la exposición, pero no eliminan este límite.
+4. La fuente/modelo públicos pueden cambiar. La separación de prompts no demuestra resistencia editorial completa a prompt injection; la autoridad técnica termina en un candidato schema-valid.
+5. Los índices dependen del esquema físico de Data Tables de n8n 2.35.7; revisar tras upgrades. Datos heredados no migrados, sin prueba de recuperación ante caída del servidor.
+6. El runtime advierte que PostgreSQL 16 tiene soporte de compatibilidad. El lockfile conserva una vulnerabilidad high preexistente en fast-uri; no se amplió el alcance a mantenimiento de plataforma.
 
 No activar el workflow ni fusionar el PR como parte de esta entrega. Una revisión independiente de los cambios puede comenzar, pero el cierre requiere resolver el scorer y completar la prueba real.
