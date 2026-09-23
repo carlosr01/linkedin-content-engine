@@ -2,7 +2,9 @@
 
 ## Estado
 
-**Delta de código fuente implementado y validado localmente. Actualización, reejecución de los 12 casos deterministas y reexportación en n8n DEV pendientes: esta sesión no tuvo acceso al contenedor DEV ni a MCP n8n.**
+**Actualizado, releído y verificado en n8n DEV. 12/12 casos deterministas PASS. WF01 sigue inactivo. No se ejecutó `live-scorer` ni `live-catalog` (fuera de alcance de este ticket). PR #14 sigue en draft.**
+
+> Continuación con acceso a DEV (misma rama, `ONE_BRANCH_ONE_WRITER=YES`): se regeneró el export vía `prepare-update.mjs`, se importó en `MBjubZf00zHeukFo`, se releyó con `export-verified.mjs` ([CAR-184-readback.json](CAR-184-readback.json)) y se corrieron los 12 casos deterministas ([CAR-184-matrix.json](CAR-184-matrix.json), ejecuciones 139–150). `workflowVersion` pasó de `b8b536e5-d89e-42d2-9e10-b0b15ab3a5a3` a `e9c16062-1f52-4251-b923-8d6c4f4c3821`; `active=false`, `activeVersionId=null` antes y después. `prepare-update.mjs` necesitó un ajuste de compatibilidad no relacionado con el diseño: el export LIVE de DEV ya reflejaba el nodo `httpRequest` de CAR-167 (no la cadena LangChain original), así que la extracción de `scorerModelId`/`scorerCredential` ahora reconoce ambas formas del export en vez de asumir sólo la anterior — necesario para que el generador sea ejecutable de nuevo, sin tocar el delta CAR-184 en sí ni ningún parámetro fuera de alcance.
 
 [CAR-184](https://linear.app/carloshermesagent/issue/CAR-184/car-167a-serialize-content-score-schema-into-wf01-openrouter-scorer) · hijo de [CAR-167](https://linear.app/carloshermesagent/issue/CAR-167) · [PR #14 (draft)](https://github.com/carlosr01/linkedin-content-engine/pull/14). Rama: `feat/car-48-wf01-content-discovery`. Continúa directamente la acción "Siguiente acción #1" de [CAR-167-scorer-http-request.md](CAR-167-scorer-http-request.md).
 
@@ -38,14 +40,14 @@ npm run ci
 
 Resultado: `format:check`, `validate:config`, `validate:schemas` (6 schemas), `validate:workflows` (1 export JSON, sólo forma/sintaxis) y `check:secrets` en PASS; **37/37 tests locales PASS** (mismo conteo que el estado previo documentado en [CAR-48-wf01.md](CAR-48-wf01.md), sin tests nuevos porque el cambio sólo afecta al generador que produce el export, no a `lib/discovery/*`). `node --check scripts/n8n-dev/prepare-update.mjs` confirma sintaxis válida.
 
-## Qué falta (bloqueado por falta de acceso, no por diseño)
+## Qué se completó en esta continuación
 
-Esta sesión no tuvo el contenedor `n8n-dev.innovaq-ai.com` disponible para ejecutar el runtime harness (requiere `docker exec` dentro de ese host, ver `scripts/n8n-dev/runtime-harness.cjs`) ni MCP n8n expuesto. Por lo tanto, no se generó un nuevo export LIVE, no se corrió `prepare-update.mjs` contra un export real, no se guardó la actualización en DEV, no se releyó ni comparó (`export-verified.mjs`), y **no se reejecutaron los 12 casos deterministas** contra el nuevo `scorerSystemPrompt`. `workflows/discovery/wf01-content-discovery.json` permanece sin modificar en este commit a propósito: por la regla de n8n del repositorio, un export versionado debe originarse y verificarse contra n8n DEV, nunca escribirse desde memoria del modelo.
+Con acceso al contenedor DEV: export LIVE fresco, `prepare-update.mjs` contra ese export real, import en `MBjubZf00zHeukFo`, relectura y comparación exacta con `export-verified.mjs` (nodes/connections/settings/active/pinData), y los 12 casos deterministas del arnés, todos PASS. `workflows/discovery/wf01-content-discovery.json` en este commit es, como siempre, el export saneado releído desde DEV — no se escribió desde memoria del modelo.
 
-`DETERMINISTIC_CASES_PASS` y `READY_FOR_COMBINED_LIVE_ACCEPTANCE` del checklist de Done de CAR-184 quedan pendientes de una sesión con acceso real al contenedor DEV, siguiendo la reproducción ya documentada en [CAR-48-wf01.md](CAR-48-wf01.md) (`prepare-update.mjs` → import en DEV → `export-verified.mjs` → `runtime-harness.cjs test ... matrix`). Nótese que, como en CAR-167, el pin data del harness fija la respuesta cruda del proveedor en el propio nodo `Score candidate with native LLM`, por lo que los 12 casos deterministas no ejercitan el nuevo `scorerSystemPrompt` (bypasean la construcción del cuerpo de la petición); su PASS confirma que el resto del flujo sigue intacto, no que el schema añadido cambie el comportamiento del proveedor real. Esa confirmación sólo la dan `live-scorer` / `live-catalog`, explícitamente fuera de alcance de este ticket.
+Como en CAR-167, el pin data del harness fija la respuesta cruda del proveedor en el propio nodo `Score candidate with native LLM`, por lo que los 12 casos deterministas no ejercitan el nuevo `scorerSystemPrompt` con el schema embebido (bypasean la construcción real del cuerpo de la petición). Su PASS confirma que el resto del flujo (parseo, validación, persistencia, dedupe, enrutamiento de errores) sigue intacto tras el cambio; **no** confirma que el schema embebido efectivamente corrija la forma de salida del proveedor real. Esa confirmación sólo la da `live-scorer`/`live-catalog`, explícitamente fuera de alcance de este ticket (`LIVE_SCORER_RUN=NO`, `LIVE_CATALOG_RUN=NO`).
 
 ## Siguiente acción
 
-1. Con acceso al contenedor DEV: regenerar el export vía `prepare-update.mjs`, importar, releer con `export-verified.mjs`, confirmar 12/12 en el harness, y commitear el `workflows/discovery/wf01-content-discovery.json` resultante junto con la evidencia (`CAR-184-matrix.json`/readback) en esta misma rama.
-2. No ejecutar `live-scorer` ni `live-catalog` todavía; esperar el resultado de CAR-167B sobre el timeout de 56 604 ms.
+1. No ejecutar `live-scorer` ni `live-catalog` todavía; esperar el resultado de CAR-167B sobre el timeout de 56 604 ms observado en `live-catalog` antes de una aceptación en vivo combinada.
+2. Cuando ambos (schema embebido + hallazgo del timeout) estén listos para probarse juntos: ejecutar `live-scorer` y `live-catalog` una sola vez cada uno, sin reintento, siguiendo el mismo protocolo que CAR-167.
 3. No fusionar el PR ni activar WF01 como parte de esta entrega.

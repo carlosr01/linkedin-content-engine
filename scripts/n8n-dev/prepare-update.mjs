@@ -256,11 +256,29 @@ code(
 // bound is enforced by the node's own timeout instead of an SDK retry policy.
 // The node name is preserved: the deterministic harness and downstream
 // connections address it by name.
+//
+// CAR-184: once a DEV export already reflects the CAR-167 httpRequest
+// scorer, the old lmChatOpenRouter node no longer exists to read the model
+// id/credential from. Recover them from whichever shape the live export is
+// currently in, so this generator stays idempotent to run again.
 const legacyModelNode = old.get(
   'OpenRouter scorer model (manual credential bind)',
 );
-const scorerModelId = legacyModelNode.parameters.model;
-const scorerCredential = legacyModelNode.credentials.openRouterApi;
+const liveScorerNode = old.get('Score candidate with native LLM');
+let scorerModelId, scorerCredential;
+if (legacyModelNode) {
+  scorerModelId = legacyModelNode.parameters.model;
+  scorerCredential = legacyModelNode.credentials.openRouterApi;
+} else if (liveScorerNode?.type === 'n8n-nodes-base.httpRequest') {
+  scorerCredential = liveScorerNode.credentials.openRouterApi;
+  // jsonBody stores the unevaluated `={{ JSON.stringify({model: "...", ...}) }}`
+  // source expression, so the object key here is unquoted JS, not JSON.
+  const match = liveScorerNode.parameters.jsonBody.match(/model:\s*"([^"]+)"/);
+  if (!match) throw Error('cannot_recover_scorer_model_id_from_live_export');
+  scorerModelId = match[1];
+} else {
+  throw Error('scorer_source_node_not_found_in_live_export');
+}
 const SCORER_REASONING_EFFORT = 'low';
 const SCORER_MAX_TOKENS = 2000;
 const SCORER_TIMEOUT_MS = 30000;
