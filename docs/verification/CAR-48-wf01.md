@@ -1,5 +1,7 @@
 # CAR-48 — WF01 en n8n DEV
 
+> **Actualización CAR-167:** el scorer se reimplementó como HTTP Request nativo (antes LangChain `chainLlm`). El bloqueador de timeout de 30 s se resolvió en el caso `live-scorer` (20 797 ms), pero ambas pruebas en vivo siguen en BLOCKED por una forma de salida del modelo que no coincide con el schema y, en `live-catalog`, por un tiempo de 56 604 ms que excede el SLO pese al timeout configurado del nodo. Detalle completo: [CAR-167-scorer-http-request.md](CAR-167-scorer-http-request.md).
+
 ## Estado
 
 **Integración DEV implementada e inactiva; cierre bloqueado por el scorer real.**

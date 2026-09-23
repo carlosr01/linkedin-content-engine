@@ -247,9 +247,24 @@ function ensure(c, m) {
         recommendedFormat: 'insight',
       };
       if (test.name === 'invalid-scorer-output') score.relevanceScore = 101;
+      // CAR-167: the scorer node is now a native HTTP Request call to
+      // OpenRouter, so the fixture pins the raw provider response shape
+      // (choices[0].message.content) at that node. The real downstream
+      // "Parse OpenRouter scorer response" node still runs and does the
+      // actual JSON.parse, exercising that parsing path in every
+      // deterministic case instead of bypassing it.
       const pinData = test.liveScorer
         ? {}
-        : { 'Score candidate with native LLM': [{ json: { output: score } }] };
+        : {
+            'Score candidate with native LLM': [
+              {
+                json: {
+                  id: 'fixture-' + test.name,
+                  choices: [{ message: { content: JSON.stringify(score) } }],
+                },
+              },
+            ],
+          };
       if (test.staleLookup)
         pinData['Find URL or hash duplicate'] = [{ json: {} }];
       if (!test.liveScorer)
@@ -289,8 +304,17 @@ function ensure(c, m) {
       const candidateFailures = rows('Report candidate failure').length;
       const duplicates = rows('Report duplicate').length;
       const attempts = counters['/' + test.name] ?? 0;
+      // CAR-167: the >30s acceptance rule is evaluated on the scorer node's
+      // OWN executionTime, never on total workflow execution time.
+      const scorerRun = (data['Score candidate with native LLM'] ?? [])[0];
+      const scorerExecutionTimeMs = scorerRun?.executionTime ?? null;
+      const scorerExecutionStatus = scorerRun?.executionStatus ?? null;
+      const scorerWithinSlo = test.liveScorer
+        ? scorerExecutionTimeMs !== null && scorerExecutionTimeMs <= 30000
+        : null;
       const passed =
         !rd.error &&
+        scorerWithinSlo !== false &&
         (test.liveCatalog
           ? inserted + duplicates === 1
           : inserted === test.insert &&
@@ -303,6 +327,8 @@ function ensure(c, m) {
         executionId: id,
         status: passed ? 'PASS' : 'FAIL',
         executionStatus: result.status,
+        scorerExecutionTimeMs,
+        scorerExecutionStatus,
         inserted,
         duplicates,
         sourceFailures,

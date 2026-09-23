@@ -1,0 +1,36 @@
+{
+  "workflowId": "MBjubZf00zHeukFo",
+  "n8nVersion": "2.35.7",
+  "liveScorer": {
+    "case": "live-scorer",
+    "executionId": "137",
+    "status": "FAIL",
+    "executionStatus": "success",
+    "scorerExecutionTimeMs": 20797,
+    "scorerExecutionStatus": "success",
+    "inserted": 0,
+    "duplicates": 0,
+    "sourceFailures": 0,
+    "candidateFailures": 1,
+    "attempts": 1,
+    "pinnedNodes": [],
+    "overrides": ["trusted fixture source catalog"],
+    "requestIntervalsMs": []
+  },
+  "liveCatalog": {
+    "case": "live-catalog",
+    "executionId": "138",
+    "status": "FAIL",
+    "executionStatus": "success",
+    "scorerExecutionTimeMs": 56604,
+    "scorerExecutionStatus": "success",
+    "inserted": 0,
+    "duplicates": 0,
+    "sourceFailures": 0,
+    "candidateFailures": 1,
+    "attempts": 0,
+    "pinnedNodes": [],
+    "overrides": ["maximumCandidatesPerRun=1"],
+    "requestIntervalsMs": []
+  }
+}

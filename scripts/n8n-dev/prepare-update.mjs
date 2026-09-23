@@ -244,59 +244,82 @@ code(
   'Report duplicate',
   `return {json:{candidateId:$json.candidateId,outcome:'duplicate',correlationId:'wf01-'+$execution.id}};`,
 );
+// CAR-167: the scorer previously ran through the langchain chainLlm +
+// lmChatOpenRouter + outputParserStructured sub-graph. That SDK path could not
+// return within the 30s SLO. This replaces it with a direct native HTTP
+// Request call to the same OpenRouter endpoint, same model, same existing
+// credential, reasoning capped to "low" and bounded output tokens, so the
+// bound is enforced by the node's own timeout instead of an SDK retry policy.
+// The node name is preserved: the deterministic harness and downstream
+// connections address it by name.
+const legacyModelNode = old.get(
+  'OpenRouter scorer model (manual credential bind)',
+);
+const scorerModelId = legacyModelNode.parameters.model;
+const scorerCredential = legacyModelNode.credentials.openRouterApi;
+const SCORER_REASONING_EFFORT = 'low';
+const SCORER_MAX_TOKENS = 2000;
+const SCORER_TIMEOUT_MS = 30000;
+const SCORER_RETRY_COUNT = 0;
+const scorerSystemPrompt =
+  prompt +
+  '\nCopy candidateId exactly from untrustedCandidate.id. Return only JSON. No tools or actions.';
 node(
   'Score candidate with native LLM',
-  '@n8n/n8n-nodes-langchain.chainLlm',
-  1.9,
+  'n8n-nodes-base.httpRequest',
+  4.5,
   {
-    promptType: 'define',
-    text:
-      '={{ JSON.stringify({policy: ' +
+    method: 'POST',
+    url: 'https://openrouter.ai/api/v1/chat/completions',
+    authentication: 'predefinedCredentialType',
+    nodeCredentialType: 'openRouterApi',
+    sendBody: true,
+    contentType: 'json',
+    specifyBody: 'json',
+    jsonBody:
+      '={{ JSON.stringify({model: ' +
+      JSON.stringify(scorerModelId) +
+      ', temperature: 0, max_tokens: ' +
+      SCORER_MAX_TOKENS +
+      ', response_format: {type: "json_object"}, reasoning: {effort: ' +
+      JSON.stringify(SCORER_REASONING_EFFORT) +
+      '}, messages: [{role: "system", content: ' +
+      JSON.stringify(scorerSystemPrompt) +
+      '}, {role: "user", content: JSON.stringify({policy: ' +
       JSON.stringify(policy) +
-      ', brandContext: "No brand context supplied; score conservatively and describe missing evidence.", untrustedCandidate: $("Process candidates sequentially").item.json.candidate}) }}',
-    messages: {
-      messageValues: [
-        {
-          type: 'SystemMessagePromptTemplate',
-          message:
-            prompt +
-            '\nCopy candidateId exactly from untrustedCandidate.id. Return only JSON. No tools or actions.',
+      ', brandContext: "No brand context supplied; score conservatively and describe missing evidence.", untrustedCandidate: $("Process candidates sequentially").item.json.candidate})}]}) }}',
+    options: {
+      timeout: SCORER_TIMEOUT_MS,
+      redirect: { redirect: { followRedirects: false } },
+      response: {
+        response: {
+          fullResponse: false,
+          neverError: false,
+          responseFormat: 'json',
         },
-      ],
+      },
     },
-    hasOutputParser: true,
-    batching: { batchSize: 1, delayBetweenBatches: 1000 },
+  },
+  {
+    onError: 'continueErrorOutput',
+    credentials: { openRouterApi: scorerCredential },
+  },
+);
+node(
+  'Parse OpenRouter scorer response',
+  'n8n-nodes-base.set',
+  3.5,
+  {
+    mode: 'raw',
+    jsonOutput:
+      '={{ JSON.stringify({output: JSON.parse($json.choices[0].message.content)}) }}',
+    options: {},
   },
   { onError: 'continueErrorOutput' },
 );
-node(
-  'Parse ContentScore schema',
-  '@n8n/n8n-nodes-langchain.outputParserStructured',
-  1.3,
-  old.get('Parse ContentScore schema').parameters,
-);
-const model = structuredClone(
-  old.get('OpenRouter scorer model (manual credential bind)'),
-);
-node(
-  model.name,
-  model.type,
-  model.typeVersion,
-  {
-    ...model.parameters,
-    options: {
-      timeout: 30000,
-      maxRetries: 2,
-      maxTokens: 1200,
-      temperature: 0,
-      responseFormat: 'json_object',
-    },
-  },
-  { credentials: model.credentials },
-);
 code(
   'Validate score and apply fixed threshold',
-  `${validation}\nconst upstream=$('Process candidates sequentially').item.json;const score=$json.output;if(!validators.score(score)||score.candidateId!==upstream.candidate.id)throw Error('invalid_score');const candidate={...upstream.candidate,status:score.relevanceScore>=${policy.minimum_relevance_score}?'SELECTED':'SCORED'};if(!validators.candidate(candidate))throw Error('invalid_candidate');return {json:{...upstream,candidate,score,provenance:{contractVersion:1,correlationId:upstream.correlationId,model:${JSON.stringify(model.parameters.model)},promptVersion:${JSON.stringify(hash(prompt))},policyVersion:${policy.version},policyHash:${JSON.stringify(hash(JSON.stringify(policy)))},brandContextHash:${JSON.stringify(hash('No brand context supplied; score conservatively and describe missing evidence.'))},generatedAt:new Date().toISOString()}}};`,
+  `${validation}\nconst upstream=$('Process candidates sequentially').item.json;const score=$json.output;if(!validators.score(score)||score.candidateId!==upstream.candidate.id)throw Error('invalid_score');const candidate={...upstream.candidate,status:score.relevanceScore>=${policy.minimum_relevance_score}?'SELECTED':'SCORED'};if(!validators.candidate(candidate))throw Error('invalid_candidate');return {json:{...upstream,candidate,score,provenance:{contractVersion:1,correlationId:upstream.correlationId,model:${JSON.stringify(scorerModelId)},scorerImplementation:'http_request',reasoningEffort:${JSON.stringify(SCORER_REASONING_EFFORT)},maxTokens:${SCORER_MAX_TOKENS},timeoutSeconds:${SCORER_TIMEOUT_MS / 1000},retryCount:${SCORER_RETRY_COUNT},promptVersion:${JSON.stringify(hash(prompt))},policyVersion:${policy.version},policyHash:${JSON.stringify(hash(JSON.stringify(policy)))},brandContextHash:${JSON.stringify(hash('No brand context supplied; score conservatively and describe missing evidence.'))},generatedAt:new Date().toISOString()}}};`,
 );
 const columns = structuredClone(persistence.parameters.columns);
 for (const [field, key] of Object.entries({
@@ -399,6 +422,7 @@ chain(
 link('Candidate already exists', 'Score candidate with native LLM', 1);
 chain(
   'Score candidate with native LLM',
+  'Parse OpenRouter scorer response',
   'Validate score and apply fixed threshold',
   'Persist candidate bundle atomically',
   'Report persisted candidate',
@@ -407,13 +431,6 @@ chain(
 link('Process candidates sequentially', 'Summarize candidate outcomes');
 link('Report candidate failure', 'Process candidates sequentially');
 link('Report persisted candidate', 'Report candidate failure', 1);
-link(
-  'Parse ContentScore schema',
-  'Score candidate with native LLM',
-  0,
-  'ai_outputParser',
-);
-link(model.name, 'Score candidate with native LLM', 0, 'ai_languageModel');
 for (const n of nodes.filter(
   (n) => n.onError === 'continueErrorOutput' && !n.name.startsWith('Report'),
 )) {
@@ -423,6 +440,7 @@ for (const n of nodes.filter(
       'Check duplicate lookup succeeded',
       'Find URL or hash duplicate',
       'Score candidate with native LLM',
+      'Parse OpenRouter scorer response',
       'Validate score and apply fixed threshold',
       'Persist candidate bundle atomically',
     ].includes(n.name)
