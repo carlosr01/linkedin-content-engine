@@ -82,10 +82,14 @@ async function bundle(source, globalName) {
 }
 const ajv = createValidator();
 ajv.opts.code.source = true;
-for (const name of ['source-record', 'content-candidate', 'content-score'])
-  ajv.addSchema(
-    JSON.parse(await fs.readFile(`schemas/${name}.schema.json`, 'utf8')),
+const schemaSources = {};
+for (const name of ['source-record', 'content-candidate', 'content-score']) {
+  const schema = JSON.parse(
+    await fs.readFile(`schemas/${name}.schema.json`, 'utf8'),
   );
+  schemaSources[name] = schema;
+  ajv.addSchema(schema);
+}
 const validation = await bundle(
   standaloneCode(ajv, {
     source: 'urn:linkedin-content-engine:schema:source-record',
@@ -261,9 +265,30 @@ const SCORER_REASONING_EFFORT = 'low';
 const SCORER_MAX_TOKENS = 2000;
 const SCORER_TIMEOUT_MS = 30000;
 const SCORER_RETRY_COUNT = 0;
+// CAR-184/CAR-167A: the langchain outputParserStructured node this HTTP
+// Request replaced (see CAR-167 above) used to inject the output schema into
+// the model call automatically via its ai_outputParser connection. The
+// direct HTTP path never did — response_format stayed {type:"json_object"}
+// (generic JSON mode) and the contract was described only in prose, which
+// CAR-167's live evidence showed the model does not reliably follow. Per
+// OpenRouter's documented structured-outputs feature
+// (https://openrouter.ai/docs/features/structured-outputs), enforcement is a
+// provider/model capability advertised as "structured_outputs" in that
+// model's supported_parameters; deepseek/deepseek-v4-flash-0731 only lists
+// "response_format" there, not "structured_outputs", so a machine-enforced
+// response_format:{type:"json_schema",...} is not a documented capability of
+// this model/provider pair and could turn a lenient mismatch into a hard
+// request error instead. So the exact schema is serialized into the request
+// instructions instead (the schema/request path this ticket allows when
+// enforcement isn't supported), read from the same parsed
+// schemas/content-score.schema.json used to validate the response below, so
+// there is exactly one schema authority.
+const scorerOutputSchema = schemaSources['content-score'];
 const scorerSystemPrompt =
   prompt +
-  '\nCopy candidateId exactly from untrustedCandidate.id. Return only JSON. No tools or actions.';
+  '\nCopy candidateId exactly from untrustedCandidate.id. Return only JSON. No tools or actions.' +
+  '\nThe JSON you return must validate exactly against this JSON Schema. Do not add, omit, or rename any property, and do not wrap it in another object:\n' +
+  JSON.stringify(scorerOutputSchema);
 node(
   'Score candidate with native LLM',
   'n8n-nodes-base.httpRequest',

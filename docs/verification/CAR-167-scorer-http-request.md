@@ -1,5 +1,7 @@
 # CAR-167 — Scorer real vía HTTP Request en n8n DEV
 
+> **Actualización CAR-184/CAR-167A:** la "Siguiente acción #1" de este documento (serializar el JSON Schema exacto en la petición) se implementó en `scripts/n8n-dev/prepare-update.mjs`. Detalle, determinación sobre soporte de `structured_outputs` en OpenRouter y estado de la reejecución en DEV: [CAR-184-schema-serialization.md](CAR-184-schema-serialization.md).
+
 ## Estado
 
 **Experimento acotado ejecutado en DEV; resultado BLOCKED. WF01 sigue inactivo. PR #14 sigue en draft.**
