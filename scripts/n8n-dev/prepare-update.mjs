@@ -67,6 +67,21 @@ const branch = (name, expr) =>
     },
     options: {},
   });
+const numericBranch = (name, expr, rightValue, operation) =>
+  node(name, 'n8n-nodes-base.if', 2.3, {
+    conditions: {
+      options: { caseSensitive: true, typeValidation: 'strict', version: 2 },
+      conditions: [
+        {
+          leftValue: expr,
+          rightValue,
+          operator: { type: 'number', operation },
+        },
+      ],
+      combinator: 'and',
+    },
+    options: {},
+  });
 async function bundle(source, globalName) {
   return (
     await build({
@@ -301,6 +316,23 @@ const SCORER_RETRY_COUNT = 0;
 // enforcement isn't supported), read from the same parsed
 // schemas/content-score.schema.json used to validate the response below, so
 // there is exactly one schema authority.
+// CAR-191: CAR-189's bounded read-only review of n8n 2.35.7 found no proven
+// native mechanism that aborts this in-flight authenticated HTTP Request at
+// exactly 30s (options.timeout only bounds time-to-first-response-byte; the
+// live-catalog run documented in CAR-167-scorer-http-request.md returned
+// successfully after 56604ms despite timeout:30000). Since the request
+// itself cannot be reliably terminated, this adds a fail-closed
+// result-authority/admission fence instead: a response evaluated at or after
+// start+30000ms is never treated as authoritative, even if the underlying
+// HTTP call did return. It does not change the HTTP node's own timeout,
+// retries, model, or reasoning effort, and it does not claim to bound total
+// wall-clock execution time.
+node('Record scorer start time', 'n8n-nodes-base.set', 3.5, {
+  mode: 'raw',
+  jsonOutput:
+    '={{ JSON.stringify({...$json, scorerStartedAtMs: $now.toMillis()}) }}',
+  options: {},
+});
 const scorerOutputSchema = schemaSources['content-score'];
 const scorerSystemPrompt =
   prompt +
@@ -347,6 +379,13 @@ node(
     onError: 'continueErrorOutput',
     credentials: { openRouterApi: scorerCredential },
   },
+);
+const SCORER_ADMISSION_WINDOW_MS = 30000;
+numericBranch(
+  'Scorer result still within admission window',
+  "={{ $now.toMillis() - $('Record scorer start time').item.json.scorerStartedAtMs }}",
+  SCORER_ADMISSION_WINDOW_MS,
+  'lt',
 );
 node(
   'Parse OpenRouter scorer response',
@@ -462,14 +501,21 @@ chain(
   'Report duplicate',
   'Process candidates sequentially',
 );
-link('Candidate already exists', 'Score candidate with native LLM', 1);
+link('Candidate already exists', 'Record scorer start time', 1);
+chain('Record scorer start time', 'Score candidate with native LLM');
 chain(
   'Score candidate with native LLM',
+  'Scorer result still within admission window',
   'Parse OpenRouter scorer response',
   'Validate score and apply fixed threshold',
   'Persist candidate bundle atomically',
   'Report persisted candidate',
   'Process candidates sequentially',
+);
+link(
+  'Scorer result still within admission window',
+  'Report candidate failure',
+  1,
 );
 link('Process candidates sequentially', 'Summarize candidate outcomes');
 link('Report candidate failure', 'Process candidates sequentially');

@@ -155,6 +155,34 @@ function ensure(c, m) {
       candidateFailures: 1,
       staleLookup: true,
     },
+    // CAR-191: result-authority/admission fence. These pin only the
+    // recorded scorer start time (never the scorer node's own timeout,
+    // retries, or output), backdating it so the admission gate evaluates a
+    // deterministic elapsed time against the real $now at execution time.
+    // "before" proves the normal accept path is untouched; "at"/"after"
+    // prove late results are rejected before parse/validation/persistence,
+    // per the accepted "at or after 30000ms" semantics (an elapsed value
+    // pinned to exactly the boundary can only ever measure at-or-after it in
+    // real execution, since evaluating the gate itself consumes time).
+    {
+      name: 'admission-before-boundary',
+      insert: 1,
+      admissionOffsetMs: 5000,
+    },
+    {
+      name: 'admission-at-boundary',
+      insert: 0,
+      candidateFailures: 1,
+      admissionOffsetMs: 30000,
+      expectNoParse: true,
+    },
+    {
+      name: 'admission-after-boundary',
+      insert: 0,
+      candidateFailures: 1,
+      admissionOffsetMs: 45000,
+      expectNoParse: true,
+    },
     { name: 'live-scorer', insert: 1, liveScorer: true },
     { name: 'live-catalog', liveScorer: true, liveCatalog: true },
   ];
@@ -280,6 +308,10 @@ function ensure(c, m) {
         take: 1000,
         skip: 0,
       });
+      if (test.admissionOffsetMs !== undefined)
+        pinData['Record scorer start time'] = [
+          { json: { scorerStartedAtMs: Date.now() - test.admissionOffsetMs } },
+        ];
       const id = await Container.get(WorkflowRunner).run({
         executionMode: 'manual',
         workflowData: w,
@@ -312,6 +344,13 @@ function ensure(c, m) {
       const scorerWithinSlo = test.liveScorer
         ? scorerExecutionTimeMs !== null && scorerExecutionTimeMs <= 30000
         : null;
+      // CAR-191: proves late results never reach parsing/validation/
+      // persistence — the admission gate sits immediately after the scorer
+      // node and before this Set node, so a rejected result leaves it with
+      // zero runs for that item.
+      const scorerResponseParsedCount = rows(
+        'Parse OpenRouter scorer response',
+      ).length;
       const passed =
         !rd.error &&
         scorerWithinSlo !== false &&
@@ -321,7 +360,8 @@ function ensure(c, m) {
             duplicates === (test.duplicates ?? 0)) &&
         sourceFailures === (test.sourceFailures ?? 0) &&
         candidateFailures === (test.candidateFailures ?? 0) &&
-        (!test.attempts || attempts === test.attempts);
+        (!test.attempts || attempts === test.attempts) &&
+        (!test.expectNoParse || scorerResponseParsedCount === 0);
       const record = {
         case: test.name,
         executionId: id,
@@ -333,6 +373,7 @@ function ensure(c, m) {
         duplicates,
         sourceFailures,
         candidateFailures,
+        scorerResponseParsedCount,
         attempts,
         pinnedNodes: Object.keys(pinData),
         overrides: [

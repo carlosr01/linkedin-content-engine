@@ -1,0 +1,29 @@
+{
+  "workflowId": "MBjubZf00zHeukFo",
+  "workflowVersion": "c2b8cfc4-021b-4281-acc4-389cf66d9cc7",
+  "active": false,
+  "activeVersionId": null,
+  "readbackVerifiedAt": "2026-09-23T23:26:34.403Z",
+  "comparedFields": ["nodes", "connections", "settings", "active", "pinData"],
+  "exportPath": "workflows/discovery/wf01-content-discovery.json",
+  "exportSha256": "d4c34ad9dc17ba43425009c606f53f129066be1ddbb5e2192ccd82bb278eda11",
+  "nodeVersions": [
+    "n8n-nodes-base.code@2",
+    "n8n-nodes-base.crypto@2",
+    "n8n-nodes-base.dataTable@1.1",
+    "n8n-nodes-base.httpRequest@4.5",
+    "n8n-nodes-base.if@2.3",
+    "n8n-nodes-base.manualTrigger@1",
+    "n8n-nodes-base.set@3.5",
+    "n8n-nodes-base.splitInBatches@3",
+    "n8n-nodes-base.splitOut@1",
+    "n8n-nodes-base.wait@1.1",
+    "n8n-nodes-base.xml@1"
+  ],
+  "sanitization": [
+    "credential bindings removed",
+    "data table bindings replaced",
+    "node ids derived from names",
+    "workflow instance metadata omitted"
+  ]
+}

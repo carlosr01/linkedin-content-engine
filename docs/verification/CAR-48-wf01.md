@@ -1,6 +1,8 @@
 # CAR-48 — WF01 en n8n DEV
 
 > **Actualización CAR-167:** el scorer se reimplementó como HTTP Request nativo (antes LangChain `chainLlm`). El bloqueador de timeout de 30 s se resolvió en el caso `live-scorer` (20 797 ms), pero ambas pruebas en vivo siguen en BLOCKED por una forma de salida del modelo que no coincide con el schema y, en `live-catalog`, por un tiempo de 56 604 ms que excede el SLO pese al timeout configurado del nodo. Detalle completo: [CAR-167-scorer-http-request.md](CAR-167-scorer-http-request.md).
+>
+> **Actualización CAR-191:** dado que ningún mecanismo nativo de n8n 2.35.7 aborta esa petición HTTP exactamente a los 30 s, se añadió un fence de autoridad de resultado/admisión: una respuesta del scorer evaluada en o después de `start+30000ms` nunca se vuelve autoritativa (no parsea, no valida, no transiciona a SCORED/SELECTED, no persiste), aunque la petición subyacente sí termine más tarde. Detalle completo: [CAR-191-result-authority-fence.md](CAR-191-result-authority-fence.md).
 
 ## Estado
 

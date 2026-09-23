@@ -1,6 +1,8 @@
 # CAR-167 — Scorer real vía HTTP Request en n8n DEV
 
 > **Actualización CAR-184/CAR-167A:** la "Siguiente acción #1" de este documento (serializar el JSON Schema exacto en la petición) se implementó en `scripts/n8n-dev/prepare-update.mjs`. Detalle, determinación sobre soporte de `structured_outputs` en OpenRouter y estado de la reejecución en DEV: [CAR-184-schema-serialization.md](CAR-184-schema-serialization.md).
+>
+> **Actualización CAR-191:** el hallazgo de este documento de que `options.timeout:30000` no acotó los 56 604 ms observados en `live-catalog` (punto 2 de "Siguiente acción") se abordó sin intentar abortar la petición: se añadió un fence de autoridad de resultado que rechaza como no-autoritativa cualquier respuesta evaluada en o después de `start+30000ms`. Detalle: [CAR-191-result-authority-fence.md](CAR-191-result-authority-fence.md).
 
 ## Estado
 

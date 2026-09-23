@@ -1,0 +1,42 @@
+{
+  "status": "PASS",
+  "readbackBundles": 5,
+  "repositorySchemas": ["source-record", "content-candidate", "content-score"],
+  "candidates": [
+    {
+      "candidateId": "candidate-06f64cf6872155057a6d11903e532333076c42dd63a4db279aee5e7a5227d041",
+      "status": "SELECTED",
+      "contentHash": "9fbe82cdf7070a77d0cacef73531e5af375dc0d9f5593d2cc471bafe0918e979",
+      "correlationId": "wf01-185",
+      "model": "fixture-scorer-v1"
+    },
+    {
+      "candidateId": "candidate-11945be08dfdc5fb3709b46d226585b2c9347f32966d99c6d3812d176f3a985e",
+      "status": "SELECTED",
+      "contentHash": "043d00ed80d506c30c0ee44fa00dbc1d721311dc3c96f83b4b23dc5b00fd5170",
+      "correlationId": "wf01-189",
+      "model": "fixture-scorer-v1"
+    },
+    {
+      "candidateId": "candidate-ae034288f2eaac9aa4cfd5d05cb2b4ec91ad1c6de3e72bb85ca918882a6bab96",
+      "status": "SELECTED",
+      "contentHash": "600c6a12e09164a598e18ddd70b11396991fdf7657286ed450363532ad2acc30",
+      "correlationId": "wf01-190",
+      "model": "fixture-scorer-v1"
+    },
+    {
+      "candidateId": "candidate-64885e4383b43eed7377ec47a1b51f4fdb11039565d40b66a42e87d2e8884b78",
+      "status": "SELECTED",
+      "contentHash": "35f991d66d088bc2698910a2808d3ee2b1663780bb15d687cd3d31d871241499",
+      "correlationId": "wf01-192",
+      "model": "fixture-scorer-v1"
+    },
+    {
+      "candidateId": "candidate-8506e65db994ac96c66c3c7b40368604b76c8a1f0bb8f0d842884bf8a259afef",
+      "status": "SELECTED",
+      "contentHash": "056c9f592cf6af7845e4ef6faa872ac7be1e60727cff4111fb74dd65f7b5a0c1",
+      "correlationId": "wf01-197",
+      "model": "fixture-scorer-v1"
+    }
+  ]
+}
