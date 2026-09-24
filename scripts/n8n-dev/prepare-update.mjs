@@ -339,6 +339,29 @@ const scorerSystemPrompt =
   '\nCopy candidateId exactly from untrustedCandidate.id. Return only JSON. No tools or actions.' +
   '\nThe JSON you return must validate exactly against this JSON Schema. Do not add, omit, or rename any property, and do not wrap it in another object:\n' +
   JSON.stringify(scorerOutputSchema);
+// CAR-197: CAR-184 embedded scorerSystemPrompt (which contains the
+// content-score schema, itself serialized with JSON.stringify) directly as
+// literal text inside the httpRequest node's `={{ ... }}` jsonBody
+// expression. JSON.stringify does not escape "{"/"}", so any nested-object
+// close in the schema (e.g. the end of "properties": {...}) can appear as a
+// literal "}}" inside that expression's source text before its real closing
+// delimiter, which n8n's expression parser reads as premature termination
+// ("invalid syntax"). The scorer's own 12-case deterministic matrix never
+// caught this because those cases pin the node's output and never evaluate
+// its jsonBody expression at all.
+// Fix: build the request body as a plain JS object in a Code node instead.
+// A Code node's jsCode field is executed as ordinary JavaScript, not scanned
+// for `{{ }}` delimiters, so splicing serialized JSON into it is safe (this
+// file already does exactly that elsewhere, e.g. "Validate score and apply
+// fixed threshold" below). The httpRequest node then only needs a short,
+// fixed expression that can never contain an embedded "}}":
+// `={{ JSON.stringify($json.scorerRequestBody) }}`. Nothing about the
+// schema/prompt content, model, credential, reasoning effort, token bound,
+// or CAR-191 admission fence changes.
+code(
+  'Build scorer request body',
+  `const candidate=$('Process candidates sequentially').item.json.candidate;const body={model:${JSON.stringify(scorerModelId)},temperature:0,max_tokens:${SCORER_MAX_TOKENS},response_format:{type:'json_object'},reasoning:{effort:${JSON.stringify(SCORER_REASONING_EFFORT)}},messages:[{role:'system',content:${JSON.stringify(scorerSystemPrompt)}},{role:'user',content:JSON.stringify({policy:${JSON.stringify(policy)},brandContext:'No brand context supplied; score conservatively and describe missing evidence.',untrustedCandidate:candidate})}]};return {json:{...$json,scorerRequestBody:body}};`,
+);
 node(
   'Score candidate with native LLM',
   'n8n-nodes-base.httpRequest',
@@ -351,18 +374,7 @@ node(
     sendBody: true,
     contentType: 'json',
     specifyBody: 'json',
-    jsonBody:
-      '={{ JSON.stringify({model: ' +
-      JSON.stringify(scorerModelId) +
-      ', temperature: 0, max_tokens: ' +
-      SCORER_MAX_TOKENS +
-      ', response_format: {type: "json_object"}, reasoning: {effort: ' +
-      JSON.stringify(SCORER_REASONING_EFFORT) +
-      '}, messages: [{role: "system", content: ' +
-      JSON.stringify(scorerSystemPrompt) +
-      '}, {role: "user", content: JSON.stringify({policy: ' +
-      JSON.stringify(policy) +
-      ', brandContext: "No brand context supplied; score conservatively and describe missing evidence.", untrustedCandidate: $("Process candidates sequentially").item.json.candidate})}]}) }}',
+    jsonBody: '={{ JSON.stringify($json.scorerRequestBody) }}',
     options: {
       timeout: SCORER_TIMEOUT_MS,
       redirect: { redirect: { followRedirects: false } },
@@ -502,7 +514,11 @@ chain(
   'Process candidates sequentially',
 );
 link('Candidate already exists', 'Record scorer start time', 1);
-chain('Record scorer start time', 'Score candidate with native LLM');
+chain(
+  'Record scorer start time',
+  'Build scorer request body',
+  'Score candidate with native LLM',
+);
 chain(
   'Score candidate with native LLM',
   'Scorer result still within admission window',
@@ -528,6 +544,7 @@ for (const n of nodes.filter(
     [
       'Check duplicate lookup succeeded',
       'Find URL or hash duplicate',
+      'Build scorer request body',
       'Score candidate with native LLM',
       'Parse OpenRouter scorer response',
       'Validate score and apply fixed threshold',
