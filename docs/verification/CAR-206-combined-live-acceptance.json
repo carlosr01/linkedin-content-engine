@@ -1,0 +1,69 @@
+{
+  "linearIssue": "CAR-206",
+  "gitHead": "4b8b89ab37142d27b6bae4450c99bc492240ae5b",
+  "workflowId": "MBjubZf00zHeukFo",
+  "workflowVersionBefore": "a82350bd-05fb-47f3-b358-2fb8fcdcedc6",
+  "workflowVersionAfter": "a82350bd-05fb-47f3-b358-2fb8fcdcedc6",
+  "n8nVersion": "2.35.7",
+  "retries": 0,
+  "evidence": [
+    {
+      "case": "live-scorer",
+      "executionId": "232",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": 8045,
+      "scorerExecutionStatus": "success",
+      "inserted": 1,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 0,
+      "scorerResponseParsedCount": 1,
+      "attempts": 1,
+      "pinnedNodes": [],
+      "overrides": ["trusted fixture source catalog"],
+      "requestIntervalsMs": [],
+      "classification": {
+        "delimiterFailureRecurred": false,
+        "car191Gate": "PASS",
+        "schemaValidation": "PASS",
+        "fullPass": true
+      }
+    },
+    {
+      "case": "live-catalog",
+      "executionId": "233",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": 8743,
+      "scorerExecutionStatus": "success",
+      "inserted": 1,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 0,
+      "scorerResponseParsedCount": 1,
+      "attempts": 0,
+      "pinnedNodes": [],
+      "overrides": ["maximumCandidatesPerRun=1"],
+      "requestIntervalsMs": [],
+      "classification": {
+        "delimiterFailureRecurred": false,
+        "car191Gate": "PASS",
+        "schemaValidation": "PASS",
+        "fullPass": true
+      }
+    }
+  ],
+  "postRunReadback": {
+    "workflowId": "MBjubZf00zHeukFo",
+    "name": "WF01__content_discovery",
+    "active": false,
+    "activeVersionId": null,
+    "versionId": "a82350bd-05fb-47f3-b358-2fb8fcdcedc6",
+    "duplicateWorkflowNameMatches": 1
+  },
+  "combinedLiveAcceptance": "PASS",
+  "prodMutation": false,
+  "publication": false,
+  "wf01Activated": false
+}
