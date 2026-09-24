@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "readbackBundles": 4,
+  "repositorySchemas": ["source-record", "content-candidate", "content-score"],
+  "candidates": [
+    {
+      "candidateId": "candidate-8bb04cb4d851fe0c94f8b4c1a984238f2457eee2671e37bfc1956c807c650d1e",
+      "status": "SELECTED",
+      "contentHash": "fff1dffa5c06cc7d70e897e86b9a37817f7e1b6c16d54b86ed39f60ffff4b720",
+      "correlationId": "wf01-72",
+      "model": "fixture-scorer-v1"
+    },
+    {
+      "candidateId": "candidate-44b8a870b724fd4b3cf4418dfcb0923f5e582bbac6409376ff26b5ba99c7f768",
+      "status": "SELECTED",
+      "contentHash": "e31781466818670baf08b4286f3dffec255af95606f90af40588519e9b6d7909",
+      "correlationId": "wf01-76",
+      "model": "fixture-scorer-v1"
+    },
+    {
+      "candidateId": "candidate-94928bc22ef18fedf053f6882bed4f8bfb9db4967d4d0acada52d33491f40ec3",
+      "status": "SELECTED",
+      "contentHash": "c8b1459efbe4685150a572f59d41b7e87baa0516d1cd5b72f08395a7647dd9c8",
+      "correlationId": "wf01-77",
+      "model": "fixture-scorer-v1"
+    },
+    {
+      "candidateId": "candidate-bd09e0e942150f0dfc0edb46479ba0c95a706d18426cd2b7684f67a7ae27c96a",
+      "status": "SELECTED",
+      "contentHash": "c573dca53825b33d05705d6a28f5af9101c3ed1e499f11e7816acd90497478e6",
+      "correlationId": "wf01-79",
+      "model": "fixture-scorer-v1"
+    }
+  ]
+}

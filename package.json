@@ -17,11 +17,14 @@
     "check:secrets": "node scripts/check-secrets.mjs",
     "validate": "npm run format:check && npm run validate:config && npm run validate:schemas && npm run validate:workflows && npm run check:secrets",
     "test": "node --test",
-    "ci": "npm run validate && npm test"
+    "ci": "npm run validate && npm test",
+    "discovery:replay": "node scripts/replay-wf01.mjs"
   },
   "devDependencies": {
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
+    "core-js-pure": "^3.50.0",
+    "esbuild": "^0.28.2",
     "prettier": "^3.6.2",
     "yaml": "^2.8.1"
   }

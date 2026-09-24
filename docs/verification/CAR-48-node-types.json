@@ -1,0 +1,78 @@
+{
+  "n8nVersion": "2.35.7",
+  "source": "n8n export:nodes en el contenedor DEV existente",
+  "definitionCount": 910,
+  "definitionsSha256": "277f2c96d400dae151cf14335858ebd678b2358f65ae56e5276a9d5c191982f0",
+  "usedTypes": [
+    {
+      "name": "@n8n/n8n-nodes-langchain.chainLlm",
+      "selectedVersions": [1.9],
+      "availableVersions": [1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9]
+    },
+    {
+      "name": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "selectedVersions": [1],
+      "availableVersions": [1]
+    },
+    {
+      "name": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "selectedVersions": [1.3],
+      "availableVersions": [1, 1.1, 1.2, 1.3]
+    },
+    {
+      "name": "n8n-nodes-base.code",
+      "selectedVersions": [2],
+      "availableVersions": [1, 2]
+    },
+    {
+      "name": "n8n-nodes-base.crypto",
+      "selectedVersions": [2],
+      "availableVersions": [2, 1]
+    },
+    {
+      "name": "n8n-nodes-base.dataTable",
+      "selectedVersions": [1.1],
+      "availableVersions": [1, 1.1]
+    },
+    {
+      "name": "n8n-nodes-base.httpRequest",
+      "selectedVersions": [4.5],
+      "availableVersions": [3, 4, 4.1, 4.2, 4.3, 4.4, 4.5, 2, 1]
+    },
+    {
+      "name": "n8n-nodes-base.if",
+      "selectedVersions": [2.3],
+      "availableVersions": [2, 2.1, 2.2, 2.3, 1]
+    },
+    {
+      "name": "n8n-nodes-base.manualTrigger",
+      "selectedVersions": [1],
+      "availableVersions": [1]
+    },
+    {
+      "name": "n8n-nodes-base.set",
+      "selectedVersions": [3.5],
+      "availableVersions": [3, 3.1, 3.2, 3.3, 3.4, 3.5, 1, 2]
+    },
+    {
+      "name": "n8n-nodes-base.splitInBatches",
+      "selectedVersions": [3],
+      "availableVersions": [3, 2, 1]
+    },
+    {
+      "name": "n8n-nodes-base.splitOut",
+      "selectedVersions": [1],
+      "availableVersions": [1]
+    },
+    {
+      "name": "n8n-nodes-base.wait",
+      "selectedVersions": [1.1],
+      "availableVersions": [1, 1.1]
+    },
+    {
+      "name": "n8n-nodes-base.xml",
+      "selectedVersions": [1],
+      "availableVersions": [1]
+    }
+  ]
+}

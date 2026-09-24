@@ -1,0 +1,219 @@
+{
+  "workflowId": "MBjubZf00zHeukFo",
+  "n8nVersion": "2.35.7",
+  "namespace": "car48-1790083966474",
+  "beforeCount": 70,
+  "evidence": [
+    {
+      "case": "valid-source",
+      "executionId": "72",
+      "status": "PASS",
+      "executionStatus": "success",
+      "inserted": 1,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 0,
+      "attempts": 1,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "duplicate-url",
+      "executionId": "73",
+      "status": "PASS",
+      "executionStatus": "success",
+      "inserted": 0,
+      "duplicates": 1,
+      "sourceFailures": 0,
+      "candidateFailures": 0,
+      "attempts": 1,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "duplicate-hash",
+      "executionId": "74",
+      "status": "PASS",
+      "executionStatus": "success",
+      "inserted": 0,
+      "duplicates": 1,
+      "sourceFailures": 0,
+      "candidateFailures": 0,
+      "attempts": 1,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "invalid-item",
+      "executionId": "75",
+      "status": "PASS",
+      "executionStatus": "success",
+      "inserted": 0,
+      "duplicates": 0,
+      "sourceFailures": 1,
+      "candidateFailures": 0,
+      "attempts": 1,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "429",
+      "executionId": "76",
+      "status": "PASS",
+      "executionStatus": "success",
+      "inserted": 1,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 0,
+      "attempts": 3,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": [1106, 2093]
+    },
+    {
+      "case": "5xx",
+      "executionId": "77",
+      "status": "PASS",
+      "executionStatus": "success",
+      "inserted": 1,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 0,
+      "attempts": 3,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": [1079, 2052]
+    },
+    {
+      "case": "timeout",
+      "executionId": "78",
+      "status": "PASS",
+      "executionStatus": "success",
+      "inserted": 0,
+      "duplicates": 0,
+      "sourceFailures": 1,
+      "candidateFailures": 0,
+      "attempts": 3,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1",
+        "HTTP timeout 100ms"
+      ],
+      "requestIntervalsMs": [1177, 2145]
+    },
+    {
+      "case": "partial-source-failure",
+      "executionId": "79",
+      "status": "PASS",
+      "executionStatus": "success",
+      "inserted": 1,
+      "duplicates": 0,
+      "sourceFailures": 1,
+      "candidateFailures": 0,
+      "attempts": 1,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "invalid-scorer-output",
+      "executionId": "80",
+      "status": "PASS",
+      "executionStatus": "success",
+      "inserted": 0,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 1,
+      "attempts": 1,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "long-retry-after",
+      "executionId": "81",
+      "status": "PASS",
+      "executionStatus": "success",
+      "inserted": 0,
+      "duplicates": 0,
+      "sourceFailures": 1,
+      "candidateFailures": 0,
+      "attempts": 1,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "atomic-url-conflict",
+      "executionId": "82",
+      "status": "PASS",
+      "executionStatus": "success",
+      "inserted": 0,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 1,
+      "attempts": 1,
+      "pinnedNodes": [
+        "Score candidate with native LLM",
+        "Find URL or hash duplicate"
+      ],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "atomic-hash-conflict",
+      "executionId": "83",
+      "status": "PASS",
+      "executionStatus": "success",
+      "inserted": 0,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 1,
+      "attempts": 1,
+      "pinnedNodes": [
+        "Score candidate with native LLM",
+        "Find URL or hash duplicate"
+      ],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    }
+  ]
+}

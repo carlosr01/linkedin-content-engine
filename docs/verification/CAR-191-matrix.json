@@ -1,0 +1,324 @@
+{
+  "workflowId": "MBjubZf00zHeukFo",
+  "n8nVersion": "2.35.7",
+  "namespace": "car48-1790206028607",
+  "beforeCount": 91,
+  "evidence": [
+    {
+      "case": "valid-source",
+      "executionId": "185",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": 0,
+      "scorerExecutionStatus": "success",
+      "inserted": 1,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 0,
+      "scorerResponseParsedCount": 1,
+      "attempts": 1,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "duplicate-url",
+      "executionId": "186",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": null,
+      "scorerExecutionStatus": null,
+      "inserted": 0,
+      "duplicates": 1,
+      "sourceFailures": 0,
+      "candidateFailures": 0,
+      "scorerResponseParsedCount": 0,
+      "attempts": 1,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "duplicate-hash",
+      "executionId": "187",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": null,
+      "scorerExecutionStatus": null,
+      "inserted": 0,
+      "duplicates": 1,
+      "sourceFailures": 0,
+      "candidateFailures": 0,
+      "scorerResponseParsedCount": 0,
+      "attempts": 1,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "invalid-item",
+      "executionId": "188",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": null,
+      "scorerExecutionStatus": null,
+      "inserted": 0,
+      "duplicates": 0,
+      "sourceFailures": 1,
+      "candidateFailures": 0,
+      "scorerResponseParsedCount": 0,
+      "attempts": 1,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "429",
+      "executionId": "189",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": 0,
+      "scorerExecutionStatus": "success",
+      "inserted": 1,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 0,
+      "scorerResponseParsedCount": 1,
+      "attempts": 3,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": [1121, 2042]
+    },
+    {
+      "case": "5xx",
+      "executionId": "190",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": 0,
+      "scorerExecutionStatus": "success",
+      "inserted": 1,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 0,
+      "scorerResponseParsedCount": 1,
+      "attempts": 3,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": [1121, 2043]
+    },
+    {
+      "case": "timeout",
+      "executionId": "191",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": null,
+      "scorerExecutionStatus": null,
+      "inserted": 0,
+      "duplicates": 0,
+      "sourceFailures": 1,
+      "candidateFailures": 0,
+      "scorerResponseParsedCount": 0,
+      "attempts": 3,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1",
+        "HTTP timeout 100ms"
+      ],
+      "requestIntervalsMs": [1142, 2134]
+    },
+    {
+      "case": "partial-source-failure",
+      "executionId": "192",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": 0,
+      "scorerExecutionStatus": "success",
+      "inserted": 1,
+      "duplicates": 0,
+      "sourceFailures": 1,
+      "candidateFailures": 0,
+      "scorerResponseParsedCount": 1,
+      "attempts": 1,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "invalid-scorer-output",
+      "executionId": "193",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": 0,
+      "scorerExecutionStatus": "success",
+      "inserted": 0,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 1,
+      "scorerResponseParsedCount": 1,
+      "attempts": 1,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "long-retry-after",
+      "executionId": "194",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": null,
+      "scorerExecutionStatus": null,
+      "inserted": 0,
+      "duplicates": 0,
+      "sourceFailures": 1,
+      "candidateFailures": 0,
+      "scorerResponseParsedCount": 0,
+      "attempts": 1,
+      "pinnedNodes": ["Score candidate with native LLM"],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "atomic-url-conflict",
+      "executionId": "195",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": 0,
+      "scorerExecutionStatus": "success",
+      "inserted": 0,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 1,
+      "scorerResponseParsedCount": 1,
+      "attempts": 1,
+      "pinnedNodes": [
+        "Score candidate with native LLM",
+        "Find URL or hash duplicate"
+      ],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "atomic-hash-conflict",
+      "executionId": "196",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": 0,
+      "scorerExecutionStatus": "success",
+      "inserted": 0,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 1,
+      "scorerResponseParsedCount": 1,
+      "attempts": 1,
+      "pinnedNodes": [
+        "Score candidate with native LLM",
+        "Find URL or hash duplicate"
+      ],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "admission-before-boundary",
+      "executionId": "197",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": 0,
+      "scorerExecutionStatus": "success",
+      "inserted": 1,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 0,
+      "scorerResponseParsedCount": 1,
+      "attempts": 1,
+      "pinnedNodes": [
+        "Score candidate with native LLM",
+        "Record scorer start time"
+      ],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "admission-at-boundary",
+      "executionId": "198",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": 0,
+      "scorerExecutionStatus": "success",
+      "inserted": 0,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 1,
+      "scorerResponseParsedCount": 0,
+      "attempts": 1,
+      "pinnedNodes": [
+        "Score candidate with native LLM",
+        "Record scorer start time"
+      ],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    },
+    {
+      "case": "admission-after-boundary",
+      "executionId": "199",
+      "status": "PASS",
+      "executionStatus": "success",
+      "scorerExecutionTimeMs": 0,
+      "scorerExecutionStatus": "success",
+      "inserted": 0,
+      "duplicates": 0,
+      "sourceFailures": 0,
+      "candidateFailures": 1,
+      "scorerResponseParsedCount": 0,
+      "attempts": 1,
+      "pinnedNodes": [
+        "Score candidate with native LLM",
+        "Record scorer start time"
+      ],
+      "overrides": [
+        "trusted fixture source catalog",
+        "provenance model=fixture-scorer-v1"
+      ],
+      "requestIntervalsMs": []
+    }
+  ]
+}

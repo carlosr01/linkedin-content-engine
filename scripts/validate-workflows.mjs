@@ -64,6 +64,55 @@ export function validateWorkflowShape(workflow, filename = 'workflow.json') {
   return errors;
 }
 
+// CAR-197: an n8n `={{ ... }}` parameter whose source text contains a
+// literal "}}" before its real closing delimiter risks the expression
+// parser terminating early (observed as "invalid syntax" when the schema
+// serialized into CAR-184's scorer prompt happened to end in nested closing
+// braces). This is a structural, generator-independent check: any single
+// full-expression string of exactly this shape is unsafe regardless of the
+// content that produced it, so flagging it here catches the whole bug class
+// for every current and future node parameter, not just the one CAR-197 fixed.
+function collectExpressionStrings(value, pathParts, results) {
+  if (typeof value === 'string') {
+    if (value.startsWith('={{') && value.endsWith('}}')) {
+      results.push({ path: pathParts.join('.'), value });
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((v, i) =>
+      collectExpressionStrings(v, [...pathParts, i], results),
+    );
+    return;
+  }
+  if (value && typeof value === 'object') {
+    for (const [key, v] of Object.entries(value)) {
+      collectExpressionStrings(v, [...pathParts, key], results);
+    }
+  }
+}
+
+export function findExpressionDelimiterRisks(
+  workflow,
+  filename = 'workflow.json',
+) {
+  const risks = [];
+  if (!Array.isArray(workflow?.nodes)) return risks;
+  for (const node of workflow.nodes) {
+    const found = [];
+    collectExpressionStrings(node?.parameters, ['parameters'], found);
+    for (const { path: paramPath, value } of found) {
+      const inner = value.slice(3, -2);
+      if (inner.includes('}}')) {
+        risks.push(
+          `${filename}: node "${node?.name ?? '?'}" ${paramPath} contains a literal "}}" before the expression's closing delimiter, which can truncate the expression during n8n parsing`,
+        );
+      }
+    }
+  }
+  return risks;
+}
+
 export async function validateWorkflowDirectory(workflowDirectory) {
   const files = await findJsonFiles(workflowDirectory);
   const errors = [];
@@ -78,6 +127,7 @@ export async function validateWorkflowDirectory(workflowDirectory) {
       continue;
     }
     errors.push(...validateWorkflowShape(workflow, relative));
+    errors.push(...findExpressionDelimiterRisks(workflow, relative));
   }
   return { files, errors };
 }
